@@ -1,7 +1,7 @@
 \documentclass[
 	12pt, % Font size
 	a4paper, % Paper size
-	oneside, % One-sided document
+	twoside, % Two-sided
 ]{report}
 
 % Set the PDF version for LuaTeX
@@ -33,40 +33,80 @@
 	natbib=true,
 	sorting=none
 ]{biblatex} % Bibliography
+\usepackage{hyperref} % Hyperlinks
+\usepackage[super]{nth} % Superscript for numbers
 
 % Bibliography
 \addbibresource{literature.bib}
 
-% Title page
-\title{Title of Your Thesis}
-\author{Til Mohr}
-\date{\today}
-
 % Document
 \begin{document}
 
-% Title page
-\maketitle
+\begin{titlepage}
+	\centering
+	{\Huge\bfseries Component Bound Branching in a Branch-and-Price Framework\par}
+	\vspace{0.85cm}
+	{\LARGE Master Thesis in Computer Science\par}
+	\vspace{2cm}
+	{\LARGE Til Mohr\par}
+	\vspace{0.5cm}
+	{\large til.mohr@rwth-aachen.de\\Student ID: 405959\par}
+	\vspace{2cm}
+	{\large \today\par}
+	\vspace{2cm}
+	\begin{minipage}{0.48\textwidth}
+		\centering
+		\nth{1} Examiner\\
+		TBD\\
+		Chair of Computer Science
+	\end{minipage}
+	\begin{minipage}{0.48\textwidth}
+		\centering
+		\nth{2} Examiner\\
+		Prof. Dr. Marco Lübbecke\\
+		Chair of Operations Research
+	\end{minipage}
+\end{titlepage}
 
 % Eidesstattliche Versicherung
 \includepdf{Formular_Eidesstattliche_Versicherung.pdf}
 
 % Abstract
 \begin{abstract}
-This is the abstract of your thesis.
+This master thesis focuses on integrating the component bound branching rule, as proposed by Lübbecke et al. [citation needed], into the branch-price-and-cut solver GCG. This rule, similarly to Vanderbeck's generic branching scheme \cite{vanderbeck2011branching}, exclusively branches in the Dantzig-Wolfe reformulated problem, where no branching decision corresponds to a branching decision in the original formulation. Current limitations within GCG's framework hinder the direct implementation of such branching rules, necessitating modifications, particularly within the pricing loop, as observed in the implementation of Vanderbeck's method. Moreover, these implementations do not capitalize on enhancements like dual value stabilization.
+
+A major contribution of this thesis is the enhancement of the GCG architecture to allow seamless integration of such new branching rules that solely operate on the reformulated problem. This advancement would also enable these rules to leverage current and future optimizations within the branch-price-and-cut framework, including dual value stabilization, without necessitating alterations to the branching rule itself.
+
+To achieve this, the thesis proposes a novel interface designed to handle constraints in the master problem that lack counterparts in the original formulation. These constraints necessitate specific modifications to the individual pricing problems to validate them within the master problem. The newly introduced 'generic mastercut' interface offers a systematic approach for creating and managing these constraints. It is tightly integrated into the GCG solver, encompassing the pricing loop, column generation, and dual value stabilization. This interface is further complemented by enhancements to the existing branching rule interface in GCG, facilitating the seamless integration and effective utilization of these generic mastercuts.
+
+Finally, I will be implementing the component bound branching rule using this new generic mastercut interface, followed by a comprehensive evaluation of its efficacy on a set of benchmark instances. The performance will be compared to the existing Vanderbeck branching rule, providing a practical analysis of both approaches.
 \end{abstract}
+\cleardoublepage
 
 % Table of contents
 \tableofcontents
+\cleardoublepage
 
 % Chapters
 \include{chapters/introduction/chapter}
+\cleardoublepage
+\include{chapters/cg_bp/chapter}
+\cleardoublepage
+\include{chapters/tools/chapter}
+\cleardoublepage
+\include{chapters/cmpbnd/chapter}
+\cleardoublepage
+\include{chapters/gm/chapter}
+\cleardoublepage
+\include{chapters/implementation/chapter}
+\cleardoublepage
+\include{chapters/evaluation/chapter}
+\cleardoublepage
 \include{chapters/conclusion/chapter}
+\cleardoublepage
 
 % References
-\begin{thebibliography}{9}
-\bibitem{ref1} Author. \textit{Title of the Reference}. Publisher, Year.
-\end{thebibliography}
+\printbibliography
 
 \end{document}
 
