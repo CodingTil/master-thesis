@@ -35,9 +35,21 @@
 ]{biblatex} % Bibliography
 \usepackage{hyperref} % Hyperlinks
 \usepackage[super]{nth} % Superscript for numbers
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage[
+	ruled,
+	linesnumbered,
+	algochapter
+]{algorithm2e}
 
 % Bibliography
 \addbibresource{literature.bib}
+
+% Custom Definitions
+\input{definitions}
 
 % Document
 \begin{document}
@@ -46,7 +58,7 @@
 	\centering
 	{\Huge\bfseries Component Bound Branching in a Branch-and-Price Framework\par}
 	\vspace{0.85cm}
-	{\LARGE Master Thesis in Computer Science\par}
+	{\LARGE Master Thesis in Computer Science\\RWTH Aachen University\par}
 	\vspace{2cm}
 	{\LARGE Til Mohr\par}
 	\vspace{0.5cm}
@@ -57,14 +69,16 @@
 	\begin{minipage}{0.48\textwidth}
 		\centering
 		\nth{1} Examiner\\
-		TBD\\
-		Chair of Computer Science
+		Prof. Dr. Peter Rossmanith\\
+		Chair of Theoretical Computer Science\\
+		RWTH Aachen University
 	\end{minipage}
 	\begin{minipage}{0.48\textwidth}
 		\centering
 		\nth{2} Examiner\\
 		Prof. Dr. Marco Lübbecke\\
-		Chair of Operations Research
+		Chair of Operations Research\\
+		RWTH Aachen University
 	\end{minipage}
 \end{titlepage}
 
@@ -73,13 +87,13 @@
 
 % Abstract
 \begin{abstract}
-This master thesis focuses on integrating the component bound branching rule, as proposed by Lübbecke et al. [citation needed], into the branch-price-and-cut solver GCG. This rule, similarly to Vanderbeck's generic branching scheme \cite{vanderbeck2011branching}, exclusively branches in the Dantzig-Wolfe reformulated problem, where no branching decision corresponds to a branching decision in the original formulation. Current limitations within GCG's framework hinder the direct implementation of such branching rules, necessitating modifications, particularly within the pricing loop, as observed in the implementation of Vanderbeck's method. Moreover, these implementations do not capitalize on enhancements like dual value stabilization.
+This master thesis integrates the component bound branching rule, proposed by Vanderbeck et al. \cite{vanderbeck2010reformulation,vanderbeck1996exact}, into the branch-price-and-cut solver GCG. This rule, similarly to Vanderbeck's generic branching scheme \cite{vanderbeck2011branching}, exclusively operates within the Dantzig-Wolfe reformulated problem, where branching decisions generally have no corresponding actions in the original formulation. The current GCG framework requires modifications for such branching rules, especially within the pricing loop, as seen in Vanderbeck's method implementation. These rules also fail to utilize enhancements like dual value stabilization.
 
-A major contribution of this thesis is the enhancement of the GCG architecture to allow seamless integration of such new branching rules that solely operate on the reformulated problem. This advancement would also enable these rules to leverage current and future optimizations within the branch-price-and-cut framework, including dual value stabilization, without necessitating alterations to the branching rule itself.
+A significant contribution of this thesis is the enhancement of the GCG architecture to facilitate the seamless integration of new branching rules that operate solely on the reformulated problem. This allows these rules to benefit from current and future improvements in the branch-price-and-cut framework, including dual value stabilization, without necessitating alterations to the branching rule itself.
 
-To achieve this, the thesis proposes a novel interface designed to handle constraints in the master problem that lack counterparts in the original formulation. These constraints necessitate specific modifications to the individual pricing problems to validate them within the master problem. The newly introduced 'generic mastercut' interface offers a systematic approach for creating and managing these constraints. It is tightly integrated into the GCG solver, encompassing the pricing loop, column generation, and dual value stabilization. This interface is further complemented by enhancements to the existing branching rule interface in GCG, facilitating the seamless integration and effective utilization of these generic mastercuts.
+The thesis proposes an interface to manage constraints in the master problem that lack counterparts in the original formulation. These constraints require specific modifications to the pricing problems to ensure their validity in the master. The 'generic mastercut' interface, tightly integrated into the GCG solver, spans the pricing loop, column generation, and dual value stabilization. Enhancements to the existing branching rule interface complement this integration, enabling effective utilization of the generic mastercuts.
 
-Finally, I will be implementing the component bound branching rule using this new generic mastercut interface, followed by a comprehensive evaluation of its efficacy on a set of benchmark instances. The performance will be compared to the existing Vanderbeck branching rule, providing a practical analysis of both approaches.
+Finally, the component bound branching rule will be implemented using this new interface and evaluated on a set of benchmark instances. Its performance will be benchmarked against the existing Vanderbeck branching rule, offering a practical comparison of both approaches.
 \end{abstract}
 \cleardoublepage
 
@@ -89,6 +103,8 @@ Finally, I will be implementing the component bound branching rule using this ne
 
 % Chapters
 \include{chapters/introduction/chapter}
+\cleardoublepage
+\include{chapters/preliminaries/chapter}
 \cleardoublepage
 \include{chapters/cg_bp/chapter}
 \cleardoublepage
