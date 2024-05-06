@@ -8,35 +8,40 @@ Have the following linear program in standard form:
 \end{aligned}
 \end{equation}
 
-The primal simplex algorithm finds an optimal solution by moving from one extreme point of the polyhedron to the next, therefore always remaining feasible. A central part of this algorithm is the sufficient optimality condition. For a basic solution $\vec{X} = \left[\vec{x}_B, \vec{x}_N\right]$ at a given extreme point to be optimal, the reduced costs $\bar{c}_j \coloneqq c_j - \vec{\pi}\transpose \vec{a}_j$ for $j \in N$ must be non-negative.
+The primal simplex algorithm finds an optimal solution by moving from one extreme point of the polyhedron to the next, therefore always remaining feasible. A central part of this algorithm is the sufficient optimality condition. For a basic solution $\vec{X} = \left[\vec{x}_\indexset{B}, \vec{x}_\indexset{N}\right]$ at a given extreme point to be optimal, the reduced costs $\bar{c}_j \coloneqq c_j - \vec{\pi}\transpose \vec{a}_j$ for $j \in \indexset{N}$ must be non-negative.
 
-This sufficient optimality condition gives rise to the \textbf{pricing problem}, which either verifies the optimality of the current basic solution, and otherwise determines the non-basic variable $x_l$, $l \in N$ with the least reduced cost ($\bar{c}_l < 0$) to be swapped into the basis next, according to Dantzig's rule (TODO cite). Formally, this can be written as:
+This sufficient optimality condition gives rise to the \textbf{pricing problem}, which either verifies the optimality of the current basic solution, and otherwise determines the non-basic variable $x_l$, $l \in \indexset{N}$ with the least reduced cost ($\bar{c}_l < 0$) to be swapped into the basis next, according to Dantzig's rule (TODO cite). Formally, this can be written as:
 \begin{equation}
-l \in \underset{j \in N}{\arg\min} \, c_j - \vec{\pi}\transpose \vec{a}_j
+l \in \underset{j \in \indexset{N}}{\arg\min} \, c_j - \vec{\pi}\transpose \vec{a}_j
 \end{equation}
+or as the linear program:
+\begin{equation}
+\bar{c}(\vec{\pi}) = \underset{j \in \indexset{N}}{\min} \, c_j - \vec{\pi}\transpose \vec{a}_j
+\end{equation}
+
 
 Solving the pricing problem thus plays an integral role in the primal simplex algorithm:
 
 \begin{algorithm}
 \caption{Primal simplex algorithm with Dantzig's rule}
-\KwIn{LP in standard form (\ref{eq:lp_standard}); Basic and non-basic index-sets $B,N$}
+\KwIn{LP in standard form (\ref{eq:lp_standard}); Basic and non-basic index-sets $\indexset{B},\indexset{N}$}
 \KwOut{Optimal Solution $(\vec{x}, z)$}
 \Loop{
-	$\vec{\pi}\transpose \gets \vec{c}_B\transpose \mat{A}_B^{-1}$;
-	$\bar{\vec{b}} \gets \mat{A}_B^{-1} \vec{b}$\;
-	$\bar{c}_j \gets c_j - \vec{\pi}\transpose \vec{a}_j$;$ \qquad \forall j \in N$\\
-	$l \gets \underset{j \in N}{\arg\min} \, \bar{c}_j$;
+	$\vec{\pi}\transpose \gets \vec{c}_\indexset{B}\transpose \mat{A}_\indexset{B}^{-1}$;
+	$\bar{\vec{b}} \gets \mat{A}_\indexset{B}^{-1} \vec{b}$\;
+	$\bar{c}_j \gets c_j - \vec{\pi}\transpose \vec{a}_j$;$ \qquad \forall j \in \indexset{N}$\\
+	$l \gets \underset{j \in \indexset{N}}{\arg\min} \, \bar{c}_j$;
 	$\bar{c}(\vec{\pi}) \gets \bar{c}_l$\;
 	\If{$\bar{c}(\vec{\pi}) \geq 0$}{
-		\Return{$\left(\left[\bar{\vec{b}}, \vec{0}\right], \vec{c}_B\transpose \vec{x}_B\right)$} \textit{by optimality}
+		\Return{$\left(\left[\bar{\vec{b}}, \vec{0}\right], \vec{c}_\indexset{B}\transpose \vec{x}_\indexset{B}\right)$} \textit{by optimality}
 	}
-	$\bar{\vec{a}}_l \gets \mat{A}_B^{-1} \vec{a}_l$\;
+	$\bar{\vec{a}}_l \gets \mat{A}_\indexset{B}^{-1} \vec{a}_l$\;
 	\If{$\bar{\vec{a}}_l \leq \vec{0}$}{
 		\Return{\None} \textit{by unboundedness}
 	}
 	$s \gets \underset{i \in \{1, \dots, m\}}{\arg\min} \, \frac{\bar{b}_i}{\bar{a}_{il}}$;
 	$x_l \gets \frac{\bar{b}_s}{\bar{a}_{sl}}$;
-	$B \gets B \cup \{l\} \subseteq \{s\}$;
-	$N \gets N \cup \{s\} \subseteq \{l\}$\;
+	$\indexset{B} \gets \indexset{B} \cup \{l\} \subseteq \{s\}$;
+	$\indexset{N} \gets \indexset{N} \cup \{s\} \subseteq \{l\}$\;
 }
 \end{algorithm}

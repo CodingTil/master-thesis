@@ -1,1 +1,66 @@
 \section{Column Generation}\label{sec:cg_bp_cg}
+Let us consider the following linear program, which we will henceforth call the \textbf{master problem} \MP{}, where $c_\vec{x} \in \mathbb{R}, \vec{a}_\vec{x}, \vec{b} \in \mathbb{R}^m, \forall \vec{x} \in \indexset{X}$:
+\begin{equation}
+\begin{aligned}
+z_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & & & \\
+&\st & \sum_{\vec{x} \in \indexset{X}} \vec{a}_\vec{x} \lambda_\vec{x} & \geq \vec{b} & \left[\vec{\pi}\right] & \\
+&& \lambda_\vec{x} & \geq \vec{0} & & \forall \vec{x} \in \indexset{X}
+\end{aligned}
+\end{equation}
+Assume the number of variables is huge, i.e. a lot larger than the number of constraints ($m \ll \abs{\indexset{X}} < \infty$). Because of this, solving \MP{} in a reasonable amount of time, sometimes at all, is infeasible.
+
+We can, however, make use of a crucial property of the primal simplex algorithm: at any given vertex solution, only few variables are in the basis. Most variables are in the non-basis, and therefore have a solution value of $0$. Having a solution value of $0$ is equivalent to not being in the linear program at all. Therefore, the primal simplex algorithm can also function using a manageable subset of variables $\indexset{X}' \subseteq \indexset{X}$, finding a possibly non-optimal, yet still feasible solution for the entire optimization problem \MP{}. We denote this master problem restricted to a subset of variables as the \textbf{restricted master problem} \RMP{}:
+\begin{equation}
+\begin{aligned}
+z_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & & & \\
+&\st & \sum_{\vec{x} \in \indexset{X}'} \vec{a}_\vec{x} \lambda_\vec{x} & \geq \vec{b} & \left[\vec{\pi}\right] & \\
+&& \lambda_\vec{x} & \geq \vec{0} & & \forall \vec{x} \in \indexset{X}'
+\end{aligned}
+\end{equation}
+
+Assuming \MP{} is feasible, two important aspects of finding an optimal solution to \MP{} are still missing: first, how do we find a subset $\indexset{X}'$ of the variables, such that \RMP{} stays feasible? Without this property of the set of variables, no solution of \RMP{} can be found, and therefore none can be found for \MP{}, which would contradict the feasibility of \MP{}. Secondly, assuming a solution of \RMP{} was found, possibly even optimal within \RMP{}, how could we build upon this solution to eventually find an optimal solution for \MP{}?
+
+In the following we will dive into these two questions in detail (Sections \ref{sec:cg_bp_cg_farkas} and \ref{sec:cg_bp_cg_reduced}), making way for the final column generation algorithm (Section \ref{sec:cg_bp_cg_alg}).
+
+\subsection{Farkas Pricing}\label{sec:cg_bp_cg_farkas}
+Let us assume \MP{} is feasible, but our current selection of variables $\indexset{X}' \subset \indexset{X}$ results in the \RMP{} being infeasible. The task is now to find additional variables such that a new set $\indexset{X}''$ with $\indexset{X}' \subset \indexset{X}'' \subseteq \indexset{X}$ makes the \RMP{} feasible. For this, consider Farkas' lemma:
+
+\begin{theorem}[Farkas' lemma]\label{th:farkas_lemma}
+Given $\mat{A} \in \mathbb{R}^{m \times n}$ and $\vec{b} \in \mathbb{R}^m$, then exactly one of the following statements holds:
+\begin{enumerate}
+	\item $\exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b}$
+	\item $\exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0$
+\end{enumerate}
+\end{theorem}
+
+Given that the \MP{} is feasible, the following must hold for the \MP{} with $\mat{A} = \mat{A}_{\vert \indexset{X}}$:
+\begin{equation}
+\begin{aligned}
+& \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \neg \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
+\Leftrightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \forall \vec{\pi} \in \mathbb{R}_+^n. \, \neg \left( \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right)\\
+\Leftrightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \\
+\Rightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \vec{x} \geq \vec{\pi}\transpose \vec{b}
+\end{aligned}
+\end{equation}
+
+Furthermore, from the infeasibility of \RMP{} we can also derive the following statement:
+\begin{equation}
+\begin{aligned}
+& \left( \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right) \\
+\Rightarrow & \left( \neg \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} > \vec{0} \right)
+\end{aligned}
+\end{equation}
+
+Therefore, there is some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ is $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}_+^n$.
+
+This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$:
+\begin{equation}
+\operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
+\end{equation}
+
+We can add all solutions $\vec{x}$ with a solution value of $\operatorname{F}(\vec{\pi}) > 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, thus turning any infeasible \RMP{} feasible.
+
+\subsection{Reduced Cost Pricing}\label{sec:cg_bp_cg_reduced}
+
+\subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
+
