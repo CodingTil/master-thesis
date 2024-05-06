@@ -47,18 +47,18 @@ Furthermore, from the infeasibility of \RMP{} we can also derive the following s
 \begin{equation}
 \begin{aligned}
 & \left( \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right) \\
-\Rightarrow & \left( \neg \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} > \vec{0} \right)
+\Rightarrow & \left( \neg \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \right)
 \end{aligned}
 \end{equation}
 
-Therefore, there is some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ is $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}_+^n$.
+Therefore, there is some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ is $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}_+^n$. If none existed, \MP{} would not be feasible.
 
-This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$:
+This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}):
 \begin{equation}
 \operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
 \end{equation}
 
-We can add all solutions $\vec{x}$ with a solution value of $\operatorname{F}(\vec{\pi}) > 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, thus turning any infeasible \RMP{} feasible.
+We can add all solutions $\vec{x}$ with a solution value of $\operatorname{F}(\vec{\pi}) < 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, adding the corresponding column $\begin{bmatrix}0 \\ \vec{a}_\vec{x} \end{bmatrix}$ to the problem, thus turning any infeasible \RMP{} feasible.
 
 \subsection{Reduced Cost Pricing}\label{sec:cg_bp_cg_reduced}
 

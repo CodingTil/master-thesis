@@ -3,3 +3,4 @@ halfspace
 halfspaces
 iff
 unboundedness
+infeasibility
