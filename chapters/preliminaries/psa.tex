@@ -23,7 +23,7 @@ Solving the pricing problem thus plays an integral role in the primal simplex al
 
 \begin{algorithm}
 \caption{Primal simplex algorithm with Dantzig's rule}
-\KwIn{LP in standard form (\ref{eq:lp_standard}); Basic and non-basic index-sets $\indexset{B},\indexset{N}$}
+\KwIn{\LP{} in standard form (\ref{eq:lp_standard}); Basic and non-basic index-sets $\indexset{B},\indexset{N}$}
 \KwOut{Optimal Solution $(\vec{x}, z)$}
 \Loop{
 	$\vec{\pi}\transpose \gets \vec{c}_\indexset{B}\transpose \mat{A}_\indexset{B}^{-1}$;

@@ -18,7 +18,7 @@ z_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & 
 \end{aligned}
 \end{equation}
 
-Assuming \MP{} is feasible, two important aspects of finding an optimal solution to \MP{} are still missing: first, how do we find a subset $\indexset{X}'$ of the variables, such that \RMP{} stays feasible? Without this property of the set of variables, no solution of \RMP{} can be found, and therefore none can be found for \MP{}, which would contradict the feasibility of \MP{}. Secondly, assuming a solution of \RMP{} was found, possibly even optimal within \RMP{}, how could we build upon this solution to eventually find an optimal solution for \MP{}?
+Assuming \MP{} is feasible, two important aspects of finding an optimal solution to \MP{} are still missing: first, how do we find a subset $\indexset{X}'$ of the variables, such that \RMP{} stays feasible? Without this property of the set of variables, no solution of \RMP{} can be found, and therefore none can be found for \MP{}, which would contradict the feasibility of \MP{}. Secondly, assuming a solution of \RMP{} was found, possibly even optimal for the \RMP{}, how could we build upon this solution to eventually find an optimal solution for \MP{}?
 
 In the following we will dive into these two questions in detail (Sections \ref{sec:cg_bp_cg_farkas} and \ref{sec:cg_bp_cg_reduced}), making way for the final column generation algorithm (Section \ref{sec:cg_bp_cg_alg}).
 
@@ -36,10 +36,9 @@ Given $\mat{A} \in \mathbb{R}^{m \times n}$ and $\vec{b} \in \mathbb{R}^m$, then
 Given that the \MP{} is feasible, the following must hold for the \MP{} with $\mat{A} = \mat{A}_{\vert \indexset{X}}$:
 \begin{equation}
 \begin{aligned}
-& \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \neg \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
-\Leftrightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \forall \vec{\pi} \in \mathbb{R}_+^n. \, \neg \left( \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right)\\
-\Leftrightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b} \qquad \land \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \\
-\Rightarrow & \exists \vec{x} \in \mathbb{R}_+^n. \, \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \vec{x} \geq \vec{\pi}\transpose \vec{b}
+& \\neg \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
+\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}_+^n. \, \neg \left( \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right)\\
+\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0
 \end{aligned}
 \end{equation}
 
@@ -53,7 +52,7 @@ Furthermore, from the infeasibility of \RMP{} we can also derive the following s
 
 Therefore, there is some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ is $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}_+^n$. If none existed, \MP{} would not be feasible.
 
-This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}):
+This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
 \begin{equation}
 \operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
 \end{equation}
@@ -61,6 +60,37 @@ This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \R
 We can add all solutions $\vec{x}$ with a solution value of $\operatorname{F}(\vec{\pi}) < 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, adding the corresponding column $\begin{bmatrix}0 \\ \vec{a}_\vec{x} \end{bmatrix}$ to the problem, thus turning any infeasible \RMP{} feasible.
 
 \subsection{Reduced Cost Pricing}\label{sec:cg_bp_cg_reduced}
+Assume the \RMP{} is feasible. Using a solver of our choice, we can now construct a solution that is optimal within the \RMP{}, providing us with the dual values $\vec{\pi}$. One now must verify whether this solution is also optimal for the \MP{}. For this purpose, we can utilize the pricing problem we are already familiar with from the primal simplex algorithm (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
+\begin{equation}
+\bar{c}(\vec{\pi}) = \underset{\vec{x} \in \indexset{X}}{\min} \, c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x}
+\end{equation}
+
+Note, that due to the optimality of \RMP{} the reduced costs of all variables $\vec{x} \in \indexset{X}'$ are already non-negative. If now $\bar{c}(\vec{\pi}) \geq 0$, we have also proven optimality of the current solution for the \MP{}. Otherwise, if $\bar{c}(\vec{\pi}) < 0$, then there is some $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ with $\bar{c}(\vec{\pi}) = c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x} < 0$. Similarly to how the primal simplex algorithm would then swap this variable into the basis, during column generation we add the corresponding column $\begin{bmatrix} c_\vec{x} \\ \vec{a}_\vec{x} \end{bmatrix}$ to the \RMP{}. An important property of this process is that the \RMP{} remains feasible.
 
 \subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
+The column generation algorithm can now be viewed as a variation of the primal simplex algorithm: We start to solve our problem, the \MP{}, with a subset of the original variables, initialized as the empty set or by using some selection-heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it is feasible, or until there are no new variables to add, proving infeasibility of \MP{}. As soon as \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for the \MP{}. If it is, we have found the optimal solution to the \MP{}. Otherwise, we add the corresponding column to the \RMP{} and repeat the process.
 
+\begin{algorithm}
+\caption{Column generation algorithm}
+\KwIn{\RMP{} with subset $\indexset{X}' \setminus \indexset{X}$, \RCP{}, \FP{}}
+\KwOut{Optimal Solution $(\vec{\lambda}, z)$ for the \MP{}}
+\While{$\operatorname{IsInfeasible}(\RMP{})$}{
+	$\left(\None, \vec{\pi}\right) \gets \operatorname{Solve}(\RMP{})$\;
+	$\left(\vec{x}, \operatorname{F}(\vec{\pi})\right) \gets \operatorname{Solve}(\FP{}, \vec{\pi})$\;
+	\If{$\operatorname{F}(\vec{\pi}) \geq 0$}{
+		\Return{\None} \textit{by \MP{} infeasibility}
+	}
+	$\indexset{X}' \gets \indexset{X}' \cup \{\vec{x}\}$\;
+	$\mat{A} \gets \begin{bmatrix} \mat{A} & \vec{a}_\vec{x} \end{bmatrix}$\;
+}
+
+\Loop{
+	$\left(\vec{\lambda}_\RMP{}, \vec{\pi} \right) \gets \operatorname{Solve}(\RMP{})$\;
+	$\left(\vec{x}, \bar{c}(\vec{\pi})\right) \gets \operatorname{Solve}(\RCP{}, \vec{\pi})$\;
+	\If{$\bar{c}(\vec{\pi}) \geq 0$}{
+		\Return{$\left(\vec{\lambda}_\RMP{}, \vec{c}_\indexset{B}\transpose \vec{x}_\indexset{B}\right)$} \textit{by optimality}
+	}
+	$\indexset{X}' \gets \indexset{X}' \cup \{\vec{x}\}$\;
+	$\mat{A} \gets \begin{bmatrix} \mat{A} & \vec{a}_\vec{x} \end{bmatrix}$\;
+}
+\end{algorithm}

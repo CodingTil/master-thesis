@@ -111,7 +111,60 @@ For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equival
 \end{enumerate}
 \end{theorem}
 
-In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e. closed halfspaces, or by its vertices and rays. Because of their unique properties, for such representation of a polyhedron it is sufficient to select its the extreme points and extreme rays. Figure xyz. illustrates this TODO-til
+In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e. closed halfspaces, or by its vertices and rays. Most polyhedra can be represented in this way using only their extreme points and extreme rays. Figure \ref{fig:minkowski-weyl} illustrates this theorem on two exemplary polyhedra.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+% Define the extreme points
+\coordinate (A) at (-4,0.5);
+\coordinate (B) at (-5,2);
+\coordinate (C) at (-4,3);
+\coordinate (D) at (-3,3);
+\coordinate (E) at (-3,0);
+
+% Draw the filled region
+\fill[fill=blue!30] (A) -- (B) -- (C) -- (D) -- (E) -- cycle;
+
+% Draw the extreme points
+\foreach \point in {A, B, C, D, E}
+  \fill[black] (\point) circle (2pt);
+
+% Draw the edges of the polyhedron
+\draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- cycle;
+
+%%%%%%%%%%
+
+% Define the extreme points
+\coordinate (A) at (1,2);
+\coordinate (B) at (0,0);
+\coordinate (C) at (2,1);
+
+% Define the ends of the rays
+\path (A) -- +(45:2cm) coordinate (A-ray);
+\path (C) -- +(45:2cm) coordinate (C-ray);
+\path (A) -- +(45:1cm) coordinate (A-ray-short);
+\path (C) -- +(45:1cm) coordinate (C-ray-short);
+
+% Draw the filled region
+\fill[fill=blue!30] (A) -- (B) -- (C) -- (C-ray) -- (A-ray) -- cycle;
+
+% Draw the extreme points
+\foreach \point in {A, B, C}
+  \fill[black] (\point) circle (2pt);
+
+% Draw the edges of the polyhedron
+\draw[thick] (A) -- (B) -- (C);
+
+% Draw rays from points (1,2) and (2,1)
+\draw[dashed, thick, gray!80, -latex] (A) -- (A-ray); % Ray at 45 degrees from point (1,2)
+\draw[dashed, thick, gray!80, -latex] (C) -- (C-ray); % Ray at 45 degrees from point (2,1)
+\draw[thick, red, -latex] (A) -- (A-ray-short); % Ray at 45 degrees from point (1,2)
+\draw[thick, red, -latex] (C) -- (C-ray-short); % Ray at 45 degrees from point (2,1)
+\end{tikzpicture}
+\caption{Illustration of the Minkowski-Weyl theorem. The left figure shows a fully encapsulated polyhedron which can be represented only by its extreme points. Unbounded polyhedra, such as the one on the right, require extreme rays, drawn in red, to be described completely.}
+\label{fig:minkowski-weyl}
+\end{figure}
 
 The following theorem builds upon the Minkowski-Weyl theorem to describe a polyhedron, which is represented by its extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$, using hyperplanes. Here, the sets $P, R$ are used to index the extreme points and extreme rays, respectively.
 
