@@ -1,0 +1,96 @@
+\section{Several and Identical Subproblems}\label{sec:cg_bp_idsp}
+Many applications are composed of several (different) families of variables and constraints, which can be decomposed into several (different) subproblems. Column generation can also be adapted to this scenario, where we have a set $K$ of subproblems $\SP{k}$ generating variables $\vec{x}^k \in \indexset{X}^k$: Our \MP{} is then defined as:
+\begin{equation}
+\begin{aligned}
+z^*_\MP{} = &\min & \sum_{k \in K}\sum_{\vec{x}^k \in \indexset{X}^k} c_{\vec{x}^k} \lambda_{\vec{x}^k} & & & \\
+&\st & \sum_{k \in K}\sum_{\vec{x}^k \in \indexset{X}^k} \vec{a}_{\vec{x}^k} \lambda_{\vec{x}^k} & \geq \vec{b} & \left[\vec{\pi}\right] & \\
+&& \lambda_\vec{x} & \geq 0 & & \forall k \in K. \forall {\vec{x}^k} \in \indexset{X}^k
+\end{aligned}
+\end{equation}
+
+All subproblems $\SP{k}$ now use the same dual values $\vec{\pi}$, and the pricing problem for each subproblem $\SP{k}$ is defined as:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{k} = \underset{\vec{x}^k \in \indexset{X}^k}{\min} \, c_{\vec{x}^k} - \vec{\pi}\transpose \vec{a}_{\vec{x}^k}
+\end{aligned}
+\end{equation}
+
+The column generation algorithm from Section \ref{sec:cg_bp_cg_alg} now proceeds as before with the adaption that it now terminates only when \textit{all} subproblems $\SP{k}$ produce columns with non-negative reduced costs.
+
+This idea of having several subproblems generating columns for the master problem can also be applied to Dantzig-Wolfe reformulated \LP{}s and \IP{}s. Recall, that we find two groups of constraints:
+\begin{equation}
+\begin{aligned}
+\polyhedron{A} &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
+\polyhedron{D} &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{D} \vec{x} \geq \vec{d} \right\} &\neq \emptyset
+\end{aligned}
+\end{equation}
+In many applications, the coefficient matrix $\mat{D}$ has a block diagonal structure, i.e.:
+\begin{equation}
+\mat{D} = \begin{bmatrix} \mat{D}^1 & & \\ & \ddots & \\ & & \mat{D}^{\abs{K}} \end{bmatrix}
+\qquad\text{and}\qquad
+\vec{d} = \begin{bmatrix} \vec{d}^1 \\ \vdots \\ \vec{d}^{\abs{K}} \end{bmatrix}
+\end{equation}
+
+Each of these $k \in K$ blocks can be considered its own subproblem independent of others. Therefore, another way of writing the \MP{} for Dantzig-Wolfe reformulated \LP{}s is (analogous for convexification and discretization of \IP{}s):
+\begin{equation}
+\begin{aligned}
+z^*_\MP{} = &\min & \sum_{k \in K}\sum_{p \in P^k} c_p^k \lambda_p^k & + & \sum_{k \in K}\sum_{r \in R^k} c_r^k \lambda_r^k & & & \\
+&\st & \sum_{k \in K}\sum_{p \in P^k} \mat{A}_p^k \lambda_p^k & + & \sum_{k \in K}\sum_{r \in R^k} \mat{A}_r^k \lambda_r^k & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] & \\
+&& \sum_{p \in P^k} \lambda_p^k & & & = 1 & \left[\pi_0^k \right] & \forall k \in K \\
+&& \lambda_p^k & & & \geq 0 & & \forall k \in K, \forall p \in P^k \\
+&& & & \lambda_r^k & \geq 0 & & \forall k \in K, \forall r \in R^k \\
+&& \sum_{p \in P^k} \vec{x}_p^k \lambda_p^k & + & \sum_{r \in R^k} \vec{x}_r^k \lambda_r^k & = \vec{x}^k \geq \vec{0} & & \forall k \in K
+\end{aligned}
+\end{equation}
+And each subproblem $\SP{k}$ is given by:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{k} = &\min & \left( \vec{c}^{k \intercal} - \vec{\pi}_\vec{b}\transpose \mat{A}^k \right) \vec{x}^k - \pi_0^k & & \\
+&\st & \mat{D}^k \vec{x}^k & \geq \vec{d}^k & \left[\vec{\pi}_\vec{d}^k\right] \\
+&& \vec{x}^k & \geq \vec{0}
+\end{aligned}
+\end{equation}
+
+Let us now consider the case where all blocks are equal, i.e. $\mat{D}^1 = \ldots = \mat{D}^{\abs{K}} = \mat{D}$ and $\vec{d}^1 = \ldots = \vec{d}^{\abs{K}} = \vec{d}$. In this case, all subproblems $\SP{k}$ are identical, generating new columns from the same set of extreme points and extreme rays. This implies, that in the \MP{} different $\lambda_p^k$ ($\lambda_r^k$) variables for different $k$ correspond to the same extreme point $\vec{x}_p$ ($\vec{x}_r$), which is redundant, and could therefore slow down the solving process. In a process called \textbf{aggregation} we can improve upon this by aggregating these variables:
+\begin{equation}
+\lambda_p \coloneqq \sum_{k \in K} \lambda_p^k, \; \forall p \in P
+\qquad\text{and}\qquad
+\lambda_r \coloneqq \sum_{k \in K} \lambda_r^k, \; \forall r \in R
+\end{equation}
+Substituting these aggregated variables in the \MP{} yields:
+\begin{subequations}
+\begin{alignat}{11}
+z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p & + & \sum_{r \in R^k} c_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \mat{A}_p \lambda_p & + & \sum_{r \in R^k} \mat{A}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] & \\
+&& \sum_{p \in P} \lambda_p & & & = \abs{K} & \left[\pi_{agg} \right] & \\
+&& \lambda_p & & & \geq 0 & & \forall p \in P \\
+&& & & \lambda_r & \geq 0 & & \forall r \in R \\
+&& \sum_{k \in K} \lambda_p^k & & & = \lambda_p & & \forall p \in P \label{eq:cg_bp_idsp_disagg1}\\
+&& & & \sum_{k \in K} \lambda_r^k & = \lambda_r & & \forall r \in R \\
+&& \sum_{p \in P} \lambda_p^k & & & = 1 & & \forall k \in K \\
+&& \lambda_p^k & & & \geq 0 & & \forall k \in K, \forall p \in P \\
+&& & & \lambda_r^k & \geq 0 & & \forall k \in K, \forall r \in R \label{eq:cg_bp_idsp_disagg2}\\
+&& \sum_{p \in P} \vec{x}_p \lambda_p^k & + & \sum_{r \in R} \vec{x}_r \lambda_r^k & = \vec{x}^k \geq \vec{0} & & \forall k \in K \label{eq:cg_bp_idsp_agg}
+\end{alignat}
+\end{subequations}
+The constraints \eqref{eq:cg_bp_idsp_disagg1} to \eqref{eq:cg_bp_idsp_disagg2} disaggregate a solution for the aggregated variables back into the master variables for each subproblem, which are used to compute a solution to the original formulation using the original variables $\vec{x}^k$. For this reason, the constraints from \eqref{eq:cg_bp_idsp_disagg1} onwards may be omitted during the column generation algorithm. This statement also holds for Dantzig-Wolfe reformulated \IP{}s using the convexification approach, where the only difference in the \MP{} are the integrality conditions on $\vec{x}^k$ in constraint \eqref{eq:cg_bp_idsp_agg}. In convexification, however, we can only ensure integrality of the original solution by branching on the integer original variables with fractional value. Therefore, we constantly need to reintroduce the disaggregated master variables to compute an original solution.
+
+Disaggregation, however, offers a powerful alternative. Its \MP{} for identical subproblem looks as follows:
+\begin{subequations}
+\begin{alignat}{11}
+z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p & + & \sum_{r \in R^k} c_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \mat{A}_p \lambda_p & + & \sum_{r \in R^k} \mat{A}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] & \\
+&& \sum_{p \in P} \lambda_p & & & = \abs{K} & \left[\pi_{agg} \right] & \\
+&& \lambda_p & & & \in \mathbb{Z}_+ & & \forall p \in P \\
+&& & & \lambda_r & \in \mathbb{Z}_+ & & \forall r \in R \\
+&& \sum_{k \in K} \lambda_p^k & & & = \lambda_p & & \forall p \in P \label{eq:cg_bp_idsp_disagg3}\\
+&& & & \sum_{k \in K} \lambda_r^k & = \lambda_r & & \forall r \in R \\
+&& \sum_{p \in P} \lambda_p^k & & & = 1 & & \forall k \in K \\
+&& \lambda_p^k & & & \in \mathbb{Z}_+ & & \forall k \in K, \forall p \in P \\
+&& & & \lambda_r^k & \in \mathbb{Z}_+ & & \forall k \in K, \forall r \in R \label{eq:cg_bp_idsp_disagg4}\\
+&& \sum_{p \in P} \vec{x}_p \lambda_p^k & + & \sum_{r \in R} \vec{x}_r \lambda_r^k & = \vec{x}^k \in \mathbb{Z}_+^n & & \forall k \in K \label{eq:cg_bp_idsp_agg2}
+\end{alignat}
+\end{subequations}
+In Section \ref{sec:cg_bp_ip_discretization} we have already observed that the integrality constraints on the original variables $\vec{x}^k$ are already enforced by ensuring integrality of the disaggregated master variables $\lambda_p^k$ and $\lambda_r^k$. In the case of identical subproblems we can go a step further and also remove the integrality constraints on the disaggregated master variables, as those are implied by the integrality of the aggregated variables $\lambda_p$ and $\lambda_r$. Therefore, during the entire solving process, we can omit the constraints \eqref{eq:cg_bp_idsp_disagg3} to \eqref{eq:cg_bp_idsp_agg2} entirely.
+
+On a final note, it is of course possible to have both identical and differing subproblems in the same \MP{}. In this case we introduce classes $C$ of identical subproblems, use one column generator per class, and aggregate the variables within each class.

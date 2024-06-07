@@ -5,6 +5,9 @@
 \numberwithin{definition}{chapter}
 \newtheorem{corollary}{Corollary}
 \numberwithin{corollary}{chapter}
+\theoremstyle{remark}
+\newtheorem{note}{Note}
+\numberwithin{note}{chapter}
 
 % Algorithm2e Keywords %
 \SetKwBlock{Loop}{loop}{}
@@ -16,7 +19,7 @@
 \newcommand{\mat}[1]{{\bm{#1}}}
 \renewcommand{\vec}[1]{{\bm{#1}}}
 \newcommand{\conv}[0]{\operatorname{conv}}
-\newcommand{\rayspan}[0]{\operatorname{rayspan}}
+\newcommand{\raycone}[0]{\operatorname{cone}}
 \newcommand{\transpose}[0]{^\intercal}
 \renewcommand{\setminus}{\backslash}
 \newcommand{\rank}[0]{\operatorname{rank}}
@@ -25,8 +28,25 @@
 \newcommand{\IP}[0]{\textit{IP}}
 \newcommand{\MP}[0]{\textit{MP}}
 \newcommand{\RMP}[0]{\textit{RMP}}
-\newcommand{\SP}[0]{\textit{SP}}
+\newcommand{\SP}[1]{{\textit{SP}\ifstrempty{#1}{}{^{#1}}}}
 \newcommand{\RCP}[0]{\textit{RCP-SP}}
 \newcommand{\FP}[0]{\textit{FP-SP}}
 \newcommand{\indexset}[1]{\mathcal{#1}}
-\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+
+% Math %
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+% Swap the definition of \abs* and \norm*, so that \abs
+% and \norm resizes the size of the brackets, and the
+% starred version does not.
+\makeatletter
+\let\oldabs\abs
+\def\abs{\@ifstar{\oldabs}{\oldabs*}}
+%
+\let\oldnorm\norm
+\def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
+\makeatother

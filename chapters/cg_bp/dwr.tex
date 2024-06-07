@@ -1,1 +1,59 @@
 \section{Dantzig-Wolfe Reformulation}\label{sec:cg_bp_dwr}
+The column generation algorithm presented in section \ref{sec:cg_bp_cg} is especially practical when we can directly formulate our optimization problem using a master and a pricing problem. Oftentimes, however, we do not have these constructions readily available. Instead, many problems are given in the more general form of a \LP{}. Using the Dantzig-Wolfe reformulation, we can automatically transform such a \LP{} into a master and pricing problem, allowing us to apply column generation. In this section, we will introduce this technique and show how it can be used to solve a \LP{}.
+
+\begin{equation}
+\begin{aligned}
+z^*_\LP{} = &\min & \vec{c}\transpose \vec{x} & & & \\
+&\st & \mat{A} \vec{x} & \geq \vec{b} & \left[\vec{\sigma}_\vec{b}\right] & \\
+&& \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\sigma}_\vec{d}\right] & \\
+&& \vec{x} & \geq \vec{0}
+\end{aligned}
+\end{equation}
+
+Take the above \LP{} as an example. The solution space if this \LP{}, defined by its constraints, can also be viewed as the intersection of the following two polyhedra:
+\begin{equation}
+\begin{aligned}
+\polyhedron{A} &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
+\polyhedron{D} &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{D} \vec{x} \geq \vec{d} \right\} &\neq \emptyset
+\end{aligned}
+\end{equation}
+
+After applying the Nemhauser-Wolsey Theorem (Theorem \ref{th:nemhauser-wolsey}) on polyhedron $\polyhedron{D}$, we can reformulate the \LP{} using $\polyhedron{D}$'s extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$. For this, we substitute the original variables $\vec{x}$ with these extreme points and extreme rays using:
+\begin{equation}
+\begin{aligned}
+\vec{x} &= \sum_{p \in P} \vec{x}_p \lambda_p + \sum_{r \in R} \vec{x}_r \lambda_r \\
+\vec{c}\transpose \vec{x} &= \sum_{p \in P} \vec{c}\transpose \vec{x}_p \lambda_p + \sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r \\
+\mat{A} \vec{x} &= \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p + \sum_{r \in R} \mat{A} \vec{x}_r \lambda_r
+\end{aligned}
+\end{equation}
+
+As a result, we have obtained a new \MP{} equivalent to the \LP{}:
+\begin{equation}
+\begin{aligned}
+z^*_\MP{} = &\min & \sum_{p \in P} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+&& \sum_{p \in P} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
+&& \lambda_p & & & \geq 0 & & \forall p \in P \\
+&& & & \lambda_r & \geq 0 & & \forall r \in R \\
+&& \sum_{p \in P} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{x}_r \lambda_r & = \vec{x} \geq \vec{0} & &
+\end{aligned}
+\end{equation}
+In this formulation, the last constraint corresponds to transforming a solution of the \MP{} using the $\lambda$ variables back into a solution of the original \LP{}. As this constraint is not otherwise involved in the optimization, it is often omitted during the solving stages and only used afterwards to reconstruct a solution using the original $\vec{x}$ variables.
+
+As the number of extreme points and extreme rays of $\polyhedron{D}$ might be huge, it is most often than not practically infeasible to solve the \MP{} directly. Instead, using this setup, we can easily generate these columns on the fly using column generation. For this, we need a subproblem that finds (improving) columns for the \MP{}, i.e. extreme points and extreme rays of $\polyhedron{D}$. We can easily formulate this pricing problem as follows:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&& \vec{x} & \geq \vec{0}
+\end{aligned}
+\end{equation}
+
+We start of by solving the \RMP{} using a subset of the extreme points $P' \subset P$ and extreme rays $R' \subset R$, giving us the dual values $\vec{\pi}_\vec{b}$ and $\pi_0$ for the \SP{}. Solving this \SP{} to optimality then leads a solution $\vec{x}^*$ with objective value $z^*_\SP{}$. The value of $z^*_\SP{}$ is now the deciding factor whether we add a column to \RMP{}, and if so, which column we add:
+\begin{itemize}
+\item If $-\infty < z^*_\SP{} < 0$, $\vec{x}^*$ is an extreme point $\vec{x}_p, p \in P \setminus P'$, and we add column $\begin{bmatrix} \vec{c}\transpose \vec{x}^* \\ \mat{A} \vec{x}^* \\ 1 \end{bmatrix}$ to the \RMP{}.
+\item If $z^*_\SP{} = -\infty$, $\vec{x}^*$ is an extreme ray $\vec{x}_r, r \in R \setminus R'$, and we add column $\begin{bmatrix} \vec{c}\transpose \vec{x}^* \\ \mat{A} \vec{x}^* \\ 0 \end{bmatrix}$ to the \RMP{}.
+\item If $z^*_\SP{} \geq 0$, there exists no improving column for the \RMP{}, thus the column generation algorithm terminates.
+\end{itemize}
+
+While in theory it does not matter how we group the constraints of our original formulation \LP{} for the Dantzig-Wolfe reformulation, since all groupings result in equivalent optimal solutions, in practice the choice of grouping can have a significant impact on the performance of the column generation algorithm. Since most of the time many iterations of the column generation algorithm are required to find an optimal solution, ideally one wants the \SP{} to be efficiently solvable. Many highly efficient algorithms for specific optimization problems exist, and by grouping constraints in a way that the \SP{} corresponds to such structures, one can leverage these algorithms to solve the \SP{} efficiently. Thankfully, there are ways of finding such groupings automatically, although this goes beyond the scope of this thesis.

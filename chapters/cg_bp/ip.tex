@@ -1,1 +1,80 @@
-\section{Dantzig-Wolfe Reformulation for Mixed Integer Programs}\label{sec:cg_bp_ip}
+\section{Dantzig-Wolfe Reformulation for Integer Programs}\label{sec:cg_bp_ip}
+Dantzig-Wolfe reformulation can also be applied to integer programs. In this section, we will show how to reformulate an integer program into a master and pricing problem, specifically focusing on the integrality conditions. Later, in Section \ref{sec:cg_bp_bp}, we will dive into how we then solve such an integer program using column generation.
+
+Take the following integer program as an example:
+\begin{equation}
+\begin{aligned}
+z^*_\IP{} = &\min & \vec{c}\transpose \vec{x} & & & \\
+&\st & \mat{A} \vec{x} & \geq \vec{b} & \left[\vec{\sigma}_\vec{b}\right] & \\
+&& \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\sigma}_\vec{d}\right] & \\
+&& \vec{x} & {\color{blue} \in \mathbb{Z}_ +^n}
+\end{aligned}
+\end{equation}
+
+Once again, we group the constraints into two sets:
+\begin{equation}
+\begin{aligned}
+\polyhedron{A} &\coloneqq \left\{ \vec{x} {\color{blue} \in \mathbb{Z}^n} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
+\polyhedron{D} &\coloneqq \left\{ \vec{x} {\color{blue} \in \mathbb{Z}^n} \mid \mat{D} \vec{x} \geq \vec{d} \right\} &\neq \emptyset
+\end{aligned}
+\end{equation}
+Note that $\polyhedron{A}$ and $\polyhedron{D}$ are now the integer hulls of the original polyhedra. For simplicity, let us denote the convex hulls defined by both groups of constraints as:
+\begin{equation}
+\begin{aligned}
+\polyhedron{A}' &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
+\polyhedron{D}' &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{D} \vec{x} \geq \vec{d} \right\} &\neq \emptyset
+\end{aligned}
+\end{equation}
+
+From here, there are two ways to proceed. The straightforward approach, called \textbf{Convexification}, follows the approach seen in the Dantzig-Wolfe reformulation of linear programs, in addition to keeping the integrality constraints on $\vec{x}$ in both the master and pricing problem. On the other hand, during \textbf{Discretization}, we modify our approach slightly, adding integrality constraints to the master variables to ensure integrality of the original variables.
+
+\subsection{Convexification}\label{sec:cg_bp_ip_convexification}
+As we have seen in Section \ref{sec:cg_bp_dwr}, we can reformulate the polyhedron $\polyhedron{D}$, which is now the integer hull defined by the constraints $\mat{D} \vec{x} \geq \vec{d}$, using the Nemhauser-Wolsey Theorem (Theorem \ref{th:nemhauser-wolsey}). This gives us a master problem, where the original variables $\vec{x}$ are represented as a convex combination of extreme points and extreme rays of $\polyhedron{D}$:
+\begin{equation}
+\begin{aligned}
+z^*_\MP{} = &\min & \sum_{p \in P} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+&& \sum_{p \in P} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
+&& \lambda_p & & & \geq 0 & & \forall p \in P \\
+&& & & \lambda_r & \geq 0 & & \forall r \in R \\
+&& \sum_{p \in P} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{x}_r \lambda_r & = \vec{x} {\color{blue} \in \mathbb{Z}_+^n} & &
+\end{aligned}
+\end{equation}
+In contrast to the Dantzig-Wolfe reformulation for linear programs, during convexification the last constraint, which reconstructs an original solution using a solution of the master problem, plays a crucial role during the solving process to ensure the integrality of the original variables, and therefore cannot simply be computed after a solution has been found. The master problem has the following pricing subproblem:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&& \vec{x} & {\color{blue} \in \mathbb{Z}_+^n}
+\end{aligned}
+\end{equation}
+
+This is it. These two changes marked in blue are the only differences between the Dantzig-Wolfe reformulation of linear programs and integer programs, ensuring that we find integer solutions for our original problem.
+
+The beauty of this approach lies in the fact that the subproblem only generates the extreme points and extreme rays of integer hull of $\{\vec{x} \geq \vec{0} \mid \mat{D} \vec{x} \geq \vec{d}\}$, regardless of how well the constraints $\mat{D} \vec{x} \geq \vec{d}$ actually approach this integer hull. Therefore, we implicitly make use of the integer hull of $\polyhedron{D}$, without having to explicitly define it.
+
+$\lambda$ solutions to the \MP{} might lead to fractional $\vec{x}$ solutions. In this case, we have no choice but to branch on those fractional original variables. We will discuss this in more detail in Section \ref{sec:cg_bp_bp_branching_original}.
+
+\subsection{Discretization}\label{sec:cg_bp_ip_discretization}
+In the discretization approach, we use the adaption of the Nemhauser-Wolsey Theorem to integer polyhedra (Theorem \ref{th:nemhauser-wolsey-integer}) to reformulate the polyhedron $\polyhedron{D}$, yielding the following master problem:
+\begin{equation}
+\begin{aligned}
+z^*_\MP{} = &\min & \sum_{p \in \ddot{P}} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
+&\st & \sum_{p \in \ddot{P}} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+&& \sum_{p \in \ddot{P}} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
+&& \lambda_p & & & \in \{0, 1\} & & \forall p \in \ddot{P} \\
+&& & & \lambda_r & \in \mathbb{Z}_+ & & \forall r \in R \\
+&& \sum_{p \in P} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{x}_r \lambda_r & = \vec{x} {\color{blue} \in \mathbb{Z}_+^n} & &
+\end{aligned}
+\end{equation}
+By design a solution to the master problem is now guaranteed to be transformable into an integer solution of the original problem. Therefore, the last constraint can be omitted during the solving process. Solving the linear relaxation of the \RMP{} might lead to fractional $\lambda$ variables, which we can then branch on. We will discuss this in more detail in Section \ref{sec:cg_bp_bp_branching_master}.
+
+Keeping in mind that $\ddot{P}$ is a subset of integer points of $\polyhedron{D}$, i.e. might include interior points, we must find a pricing problem that can generate not only extreme points (and rays) of $\polyhedron{D}$, but also interior points. This, however, is not very trivial, since in mathematical optimization one only tries to find the most optimal solutions, i.e. the extreme points. We can, however, postpone this concern for now, and use the same pricing problem as in the convexification approach:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&& \vec{x} & {\color{blue} \in \mathbb{Z}_+^n}
+\end{aligned}
+\end{equation}
+As we will find out later in Section \ref{sec:cg_bp_bp_branching_master}, this concern of generating interior points is addressed during the branching process, which allows us to generate such points on the fly. Therefore, combined with branching, the discretization approach is also a viable method to solve integer programs using column generation.

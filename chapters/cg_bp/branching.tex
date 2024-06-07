@@ -1,1 +1,46 @@
 \section{Branch-and-Price}\label{sec:cg_bp_bp}
+In Section \ref{sec:cg_bp_ip} we have seen how to reformulate an integer program into a master and pricing problem, specifically focusing on the integrality conditions. In this section, we will dive into how we then solve such an integer master program using column generation. First, let us remember what branching is for. Recall, that often we cannot solve an integer problem directly. Instead, we rely on the \LP{} relaxations of the problem which in turn can be solved by algorithms such as the simplex method. An optimal solution of the \LP{} relaxation might have some fractional values for the integer variables, i.e. produce infeasible solutions for the \IP{}. To overcome this, we branch on these fractional variables, creating subproblems, which explicitly cut off these fractional solutions. By recursively solving these subproblems, we eventually find an optimal integer solution. This process is widely known as \textbf{branch-and-bound}.
+
+In the context of column generation for integer master programs, we proceed similarly: first, we relax the integrality constraints of the master problem, which allows us to solve the relaxation using column generation to optimality. Then, we check if the integrality conditions are satisfied. If not, we must cut off the fractional solution by branching. Combining branching with column generation, we obtain the term \textbf{branch-and-price}.
+
+We have gotten to know two distinct approaches of reformulating an \IP{} into a (integer) master and pricing problem: convexification (Section \ref{sec:cg_bp_ip_convexification}) and discretization (Section \ref{sec:cg_bp_ip_discretization}). Since we require integrality of the original variables in both approaches, it is always possible to branch on fractional solutions of the original variables. We have seen, however, that discretization additionally introduces integrality constraints on the master variables which in turn imply integrality of the original variables. Therefore, in discretization, we can branch on the master variables as well. In the following, we will discuss both approaches in more detail.
+
+\subsection{Branching on the Original Variables}\label{sec:cg_bp_bp_branching_original}
+Assume we have a fractional solution $\vec{x}_\MP{}^*$ to the relaxed restricted master problem \RMP{}, i.e. there is some $x_j^* \not\in \mathbb{Z}$ for some integer variable $x_j$. Then we can cut off this fractional solution by creating two subbranches (\textbf{dichotomous branching}), one where $x_j \leq \floor{x_j^*}$ and one where $x_j \geq \ceil{x_j^*}$. In the branch-and-price context, there are actually two ways to enforce this branching decision:
+
+\subsubsection{Branching in the Master Problem}
+Recall that the \MP{} includes the following constraint:
+\begin{equation}
+\sum_{p \in P} \vec{x}_p \lambda_p + \sum_{r \in R} \vec{x}_r \lambda_r = \vec{x} \in \mathbb{Z}_+^n
+\end{equation}
+Obviously, this constraint is now violated in the case of variable $x_j$. We can enforce the branching decision $x_j \leq \floor{x_j^*}$ by adding the following constraint to the \MP{} (analogous for the up-branch):
+\begin{equation}
+\sum_{p \in P} x_{pj} \lambda_p + \sum_{r \in R} x_{rj} \lambda_r \leq \floor{x_j^*} \quad \left[{\color{blue} \alpha_j }\right]
+\end{equation}
+In order to keep generating only improving columns after branching, we must consider the dual variable $\alpha_j$ in the pricing problem:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \alpha_j x_j} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation}
+
+\subsubsection{Branching in the Pricing Problem}
+Alternatively, we may add the branching decision directly to the pricing problem:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& {\color{blue} x_j} & {\color{blue} \leq \floor{x_j^*}}\\
+&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation}
+Unfortunately, the \RMP{} might already contain generated columns that violate the branching decision. To ensure correctness of this implementation of the branching decision, we must forbid all existing columns with $x_j > \floor{x_j^*}$ from being part of the solution in the master. This could be achieved by removing such columns altogether, or by adding the following constraint to the \MP{}:
+\begin{equation}
+\sum_{p \in P: x_{pj} > \floor{x_j^*}} \lambda_p + \sum_{r \in R: x_{rj} > \floor{x_j^*}} \lambda_r = 0
+\end{equation}
+
+\subsection{Branching on the Master Variables}\label{sec:cg_bp_bp_branching_master}
+\subsubsection{Vanderbeck's Geneic Branching Scheme}
+\subsubsection{Special Case: Ryan-Foster Branching}

@@ -2,9 +2,9 @@
 Let us consider the following linear program, which we will henceforth call the \textbf{master problem} \MP{}, where $c_\vec{x} \in \mathbb{R}, \vec{a}_\vec{x}, \vec{b} \in \mathbb{R}^m, \forall \vec{x} \in \indexset{X}$:
 \begin{equation}
 \begin{aligned}
-z_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & & & \\
+z^*_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & & & \\
 &\st & \sum_{\vec{x} \in \indexset{X}} \vec{a}_\vec{x} \lambda_\vec{x} & \geq \vec{b} & \left[\vec{\pi}\right] & \\
-&& \lambda_\vec{x} & \geq \vec{0} & & \forall \vec{x} \in \indexset{X}
+&& \lambda_\vec{x} & \geq 0 & & \forall \vec{x} \in \indexset{X}
 \end{aligned}
 \end{equation}
 Assume the number of variables is huge, i.e. a lot larger than the number of constraints ($m \ll \abs{\indexset{X}} < \infty$). Because of this, solving \MP{} in a reasonable amount of time, sometimes at all, is infeasible.
@@ -12,9 +12,9 @@ Assume the number of variables is huge, i.e. a lot larger than the number of con
 We can, however, make use of a crucial property of the primal simplex algorithm: at any given vertex solution, only few variables are in the basis. Most variables are in the non-basis, and therefore have a solution value of $0$. Having a solution value of $0$ is equivalent to not being in the linear program at all. Therefore, the primal simplex algorithm can also function using a manageable subset of variables $\indexset{X}' \subseteq \indexset{X}$, finding a possibly non-optimal, yet still feasible solution for the entire optimization problem \MP{}. We denote this master problem restricted to a subset of variables as the \textbf{restricted master problem} \RMP{}:
 \begin{equation}
 \begin{aligned}
-z_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & & & \\
+z^*_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & & & \\
 &\st & \sum_{\vec{x} \in \indexset{X}'} \vec{a}_\vec{x} \lambda_\vec{x} & \geq \vec{b} & \left[\vec{\pi}\right] & \\
-&& \lambda_\vec{x} & \geq \vec{0} & & \forall \vec{x} \in \indexset{X}'
+&& \lambda_\vec{x} & \geq 0 & & \forall \vec{x} \in \indexset{X}'
 \end{aligned}
 \end{equation}
 
@@ -67,9 +67,6 @@ Assume the \RMP{} is feasible. Using a solver of our choice, we can now construc
 
 Note, that due to the optimality of \RMP{} the reduced costs of all variables $\vec{x} \in \indexset{X}'$ are already non-negative. If now $\bar{c}(\vec{\pi}) \geq 0$, we have also proven optimality of the current solution for the \MP{}. Otherwise, if $\bar{c}(\vec{\pi}) < 0$, then there is some $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ with $\bar{c}(\vec{\pi}) = c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x} < 0$. Similarly to how the primal simplex algorithm would then swap this variable into the basis, during column generation we add the corresponding column $\begin{bmatrix} c_\vec{x} \\ \vec{a}_\vec{x} \end{bmatrix}$ to the \RMP{}. An important property of this process is that the \RMP{} remains feasible.
 
-\subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
-The column generation algorithm can now be viewed as a variation of the primal simplex algorithm: We start to solve our problem, the \MP{}, with a subset of the original variables, initialized as the empty set or by using some selection-heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it is feasible, or until there are no new variables to add, proving infeasibility of \MP{}. As soon as \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for the \MP{}. If it is, we have found the optimal solution to the \MP{}. Otherwise, we add the corresponding column to the \RMP{} and repeat the process.
-
 \begin{algorithm}
 \caption{Column generation algorithm}
 \KwIn{\RMP{} with subset $\indexset{X}' \setminus \indexset{X}$, \RCP{}, \FP{}}
@@ -94,3 +91,6 @@ The column generation algorithm can now be viewed as a variation of the primal s
 	$\mat{A} \gets \begin{bmatrix} \mat{A} & \vec{a}_\vec{x} \end{bmatrix}$\;
 }
 \end{algorithm}
+
+\subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
+The column generation algorithm can now be viewed as a variation of the primal simplex algorithm: We start to solve our problem, the \MP{}, with a subset of the original variables, initialized as the empty set or by using some selection-heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it is feasible, or until there are no new variables to add, proving infeasibility of \MP{}. As soon as \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for the \MP{}. If it is, we have found the optimal solution to the \MP{}. Otherwise, we add the corresponding column to the \RMP{} and repeat the process.

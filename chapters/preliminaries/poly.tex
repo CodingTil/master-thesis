@@ -11,7 +11,7 @@ Given $k$ points $\vec{x}_1, \dots, \vec{x}_k \in \mathbb{R}^n$, any $\vec{x} = 
 
 The set of all convex combinations of $\vec{x}_1, \dots, \vec{x}_k$ is therefore defined as:
 \begin{equation*}
-\conv(\vec{x}_1, \dots, \vec{x}_k) \coloneqq \{\sum_{i=1}^{k} \alpha_i \vec{x}_i \mid \sum_{i=1}^{k} \alpha_i = 1 \land \forall i \in \{1, \dots, k\}. \alpha_i \geq 0\}
+\conv(\vec{x}_1, \dots, \vec{x}_k) \coloneqq \left\{\sum_{i=1}^{k} \alpha_i \vec{x}_i \mid \sum_{i=1}^{k} \alpha_i = 1 \land \forall i \in \{1, \dots, k\}. \alpha_i \geq 0 \right\}
 \end{equation*}
 \end{definition}
 
@@ -31,9 +31,9 @@ Let $\polyhedron{P}$ be a convex set. A point $\vec{p} \in \polyhedron{P}$ is an
 \begin{definition}\label{def:rays}
 Let $\polyhedron{P}$ be a convex set. A vector $\vec{r} \in \mathbb{R}_0^n \setminus \{0\}$ is a \textbf{ray} of $\polyhedron{P}$ iff $\forall \vec{x} \in \polyhedron{P}. \forall \beta \in \mathbb{R}_+. \vec{x} + \beta \vec{r} \in \polyhedron{P}$.
 
-The span of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n$ we denote as:
+The cone of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n$ we denote as:
 \begin{equation*}
-\rayspan(\vec{r}_1, \dots, \vec{r}_k) \coloneqq \bigcup_{i=1}^{k} \{\omega \vec{r}_i \mid \omega \in \mathbb{R}_+\}
+\raycone(\vec{r}_1, \dots, \vec{r}_k) \coloneqq \left\{ \sum_{i=1}^{k} \alpha_i \vec{r}_i \mid \forall i \in \{1, \dots, k\}. \alpha_i \geq 0 \right\}
 \end{equation*}
 \end{definition}
 
@@ -99,7 +99,7 @@ By Corollaries \ref{cor:intersection_convex} and \ref{cor:halfspace_convex}, a p
 \begin{definition}
 The \textbf{Minkowski sum} of two sets $P, Q$ is defined by:
 \begin{equation*}
-P \oplus Q \coloneqq \{\vec{p} + \vec{q} \mid \vec{p} \in P \land \vec{q} \in Q\}
+P \oplus Q \coloneqq \left\{\vec{p} + \vec{q} \mid \vec{p} \in P \land \vec{q} \in Q \right\}
 \end{equation*}
 \end{definition}
 
@@ -107,7 +107,7 @@ P \oplus Q \coloneqq \{\vec{p} + \vec{q} \mid \vec{p} \in P \land \vec{q} \in Q\
 For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equivalent:
 \begin{enumerate}
 \item $\polyhedron{P}$ is a polyhedron, i.e., there exists some finite matrix $\mat{A} \in \mathbb{R}^{m \times n}$ and some vector $\vec{b} \in \mathbb{R}^m$ such that $P = \{\vec{x} \in \mathbb{R}^n \mid \mat{A} \vec{x} \leq \vec{b}\}$
-\item There exist fine vectors $\vec{v}_1, \dots, \vec{v}_s \in \mathbb{R}^n$ and finite vectors $\vec{r}_1, \dots, \vec{r}_t \in \mathbb{R}_+^n$, such that $P = \conv(\vec{v}_1, \dots, \vec{v}_s) \oplus \rayspan(\vec{r}_1, \dots, \vec{r}_t)$
+\item There exist fine vectors $\vec{v}_1, \dots, \vec{v}_s \in \mathbb{R}^n$ and finite vectors $\vec{r}_1, \dots, \vec{r}_t \in \mathbb{R}_+^n$, such that $P = \conv(\vec{v}_1, \dots, \vec{v}_s) \oplus \raycone(\vec{r}_1, \dots, \vec{r}_t)$
 \end{enumerate}
 \end{theorem}
 
@@ -183,4 +183,26 @@ An equivalent description of $\polyhedron{P}$ using its extreme points $\{\vec{x
 \end{equation}
 \end{theorem}
 
-In the Nemhauser-Wolsey theorem, the conditions of the Minkowski-Weyl theorem are clearly encoded: the second and third lines ensure that the convex set of the extreme points are considered in the first line (Definition \ref{def:convex}), the last playing a part in the span of extreme rays (Definition \ref{def:rays}), and the first line being the Minkowski sum of the convex hull of extreme rays and the span of extreme rays.
+In the Nemhauser-Wolsey theorem, the conditions of the Minkowski-Weyl theorem are clearly encoded: the second and third lines ensure that the convex set of the extreme points are considered in the first line (Definition \ref{def:convex}), the last playing a part in the cone of extreme rays (Definition \ref{def:rays}), and the first line being the Minkowski sum of the convex hull of extreme rays and the cone of extreme rays.
+
+The Nemhauser-Wolsey theorem has also been adapted to integral polyhedra:
+
+\begin{theorem}[Nemhauser-Wolsey]\label{th:nemhauser-wolsey-integer}
+Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e. $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$. Have $\polyhedron{Q} \coloneqq \polyhedron{P} \cap \mathbb{Z}^n \neq \emptyset$ by the integer hull of $\polyhedron{P}$.
+
+An equivalent description of $\polyhedron{Q}$ using a finite subset $\{\vec{x}_p\}_{p \in \ddot{P}}$ of its integer points and its (integer-scaled) extreme rays $\{\vec{x}_r\}_{r \in R}$ is:
+\begin{equation}
+\polyhedron{Q} = \left\{ \vec{x} \in \mathbb{Z}^n \middle\vert
+\begin{aligned}
+\sum_{p \in \ddot{P}} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{x}_r \lambda_r &= \vec{x} &\\
+\sum_{p \in \ddot{P}} \lambda_p & & &= 1 &\\
+\lambda_p & & &\in \{0, 1\} &\forall p \in \ddot{P}\\
+& &\lambda_r &\in \mathbb{Z}_+ &\forall r \in R
+\end{aligned}
+\right\}
+\end{equation}
+\end{theorem}
+
+\begin{note}\label{note:nemhauser-wolsey}
+A notable difference between the Nemhauser-Wolsey theorem for real polyhedra and integral polyhedra is that for the former it suffices to use extreme points and extreme rays, while for the latter, interior points of $\polyhedron{Q}$ might be required to describe the integer hull $\polyhedron{Q}$.
+\end{note}

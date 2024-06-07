@@ -4,3 +4,7 @@ halfspaces
 iff
 unboundedness
 infeasibility
+subproblems
+convexification
+Dantzig-Wolfe
+subproblem
