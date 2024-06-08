@@ -6,17 +6,25 @@ In the context of column generation for integer master programs, we proceed simi
 We have gotten to know two distinct approaches of reformulating an \IP{} into a (integer) master and pricing problem: convexification (Section \ref{sec:cg_bp_ip_convexification}) and discretization (Section \ref{sec:cg_bp_ip_discretization}). Since we require integrality of the original variables in both approaches, it is always possible to branch on fractional solutions of the original variables. We have seen, however, that discretization additionally introduces integrality constraints on the master variables which in turn imply integrality of the original variables. Therefore, in discretization, we can branch on the master variables as well. In the following, we will discuss both approaches in more detail.
 
 \subsection{Branching on the Original Variables}\label{sec:cg_bp_bp_branching_original}
-Assume we have a fractional solution $\vec{x}_\MP{}^*$ to the relaxed restricted master problem \RMP{}, i.e. there is some $x_j^* \not\in \mathbb{Z}$ for some integer variable $x_j$. Then we can cut off this fractional solution by creating two subbranches (\textbf{dichotomous branching}), one where $x_j \leq \floor{x_j^*}$ and one where $x_j \geq \ceil{x_j^*}$. In the branch-and-price context, there are actually two ways to enforce this branching decision:
+Assume we have a fractional solution $\vec{x}_\RMP{}^*$ to the relaxed restricted master problem \RMP{}, i.e. there is some $x_j^* \not\in \mathbb{Z}$ for some integer variable $x_j$. Then we can cut off this fractional solution by creating two subbranches (\textbf{dichotomous branching}), one where $x_j \leq \floor{x_j^*}$ and one where $x_j \geq \ceil{x_j^*}$. In each of these subtrees, a solution to the \RMP{} should be guaranteed to only use columns that satisfy the branching decision, and during the solving process, the pricing problems should (only) be able to generate such columns as well.
+
+\begin{note}
+Branching on the original variables obviously allows the subproblem to generate the interior points required for the correctness of the discretization approach, as discussed in Section \ref{sec:cg_bp_ip_discretization}.
+\end{note}
+
+In the branch-and-price context, there are actually two ways to enforce this branching decision:
 
 \subsubsection{Branching in the Master Problem}
 Recall that the \MP{} includes the following constraint:
 \begin{equation}
 \sum_{p \in P} \vec{x}_p \lambda_p + \sum_{r \in R} \vec{x}_r \lambda_r = \vec{x} \in \mathbb{Z}_+^n
 \end{equation}
+
 Obviously, this constraint is now violated in the case of variable $x_j$. We can enforce the branching decision $x_j \leq \floor{x_j^*}$ by adding the following constraint to the \MP{} (analogous for the up-branch):
 \begin{equation}
 \sum_{p \in P} x_{pj} \lambda_p + \sum_{r \in R} x_{rj} \lambda_r \leq \floor{x_j^*} \quad \left[{\color{blue} \alpha_j }\right]
 \end{equation}
+
 In order to keep generating only improving columns after branching, we must consider the dual variable $\alpha_j$ in the pricing problem:
 \begin{equation}
 \begin{aligned}
@@ -36,11 +44,159 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 && \vec{x} & \in \mathbb{Z}_+^n
 \end{aligned}
 \end{equation}
+
 Unfortunately, the \RMP{} might already contain generated columns that violate the branching decision. To ensure correctness of this implementation of the branching decision, we must forbid all existing columns with $x_j > \floor{x_j^*}$ from being part of the solution in the master. This could be achieved by removing such columns altogether, or by adding the following constraint to the \MP{}:
 \begin{equation}
 \sum_{p \in P: x_{pj} > \floor{x_j^*}} \lambda_p + \sum_{r \in R: x_{rj} > \floor{x_j^*}} \lambda_r = 0
 \end{equation}
 
 \subsection{Branching on the Master Variables}\label{sec:cg_bp_bp_branching_master}
-\subsubsection{Vanderbeck's Geneic Branching Scheme}
-\subsubsection{Special Case: Ryan-Foster Branching}
+Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}_\RMP{}^*$ is fractional, i.e. $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, in this context, dichotomous branching on such a singular variable $\lambda_q$ is very weak:
+
+Assume $q \in \ddot{P}$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is in fact only little better than enumerating all possible solutions. Cutting off multiple fractional solutions in each child node would be more desirable.
+
+Alternatively, given a fractional master solution $\vec{\lambda}_\RMP{}^*$, we can find a subset $\emptyset \subset Q' \subset Q$ of variables, for which the following holds:
+\begin{equation}
+\sum_{q \in Q'} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
+\end{equation}
+
+It is obvious that such a subset $Q'$ always exists, e.g. for dichotomous branching choose $Q' = \{\lambda_q\}$. In the master problem, we could then branch on this integrality condition, e.g. in the down branch using:
+\begin{equation}
+\sum_{q \in Q'} \lambda_q \leq \floor{K} \quad \left[\gamma\right]
+\end{equation}
+
+The corresponding subproblem must now be adapted to ensure the validity of the branching decision in the master:
+\begin{equation}\label{eq:cg_bp_branchmaster_pricingmod}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma y} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& {\color{blue} y = 1} & {\color{blue} \Leftrightarrow \vec{x} \in Q'} \\
+&& \vec{x} & \in \mathbb{Z}_+^n \\
+&& {\color{blue} y} & {\color{blue} \in \{0, 1\}}
+\end{aligned}
+\end{equation}
+
+The challenge which remains is determining a routine to find such a subset $Q'$ in the master solution, for which the logical equivalence to be added to the \SP{}, i.e. the set inclusion rule, is also \textit{expressible using a finite set of linear constraints}, that can be added to the \SP{} instead.
+
+\begin{note}
+Adding the variable $y$ to the subproblem is the deciding property which allows the column generation algorithm to generate the interior points required for the correctness of the discretization approach, as discussed in Section \ref{sec:cg_bp_ip_discretization}.
+\end{note}
+
+\begin{note}
+Aggregation of subproblems (Section \ref{sec:cg_bp_idsp}) is not of an issue during branching. In such cases, we would simply branch on the aggregated variables within each block (group of identical subproblems). Yet, for the purpose of more readable notation, we will not consider formulations with multiple subproblems from here on out, focusing only on cases with a single non-aggregated block.
+\end{note}
+
+\subsubsection{Vanderbeck's Generic Branching Scheme}\label{sec:cg_bp_bp_branching_generic}
+Vanderbeck has proposed an elaborate scheme to find such a subset $Q'$ in the master solution, which can be used to branch on the master variables for any type of bounded \IP{}, i.e. which has no extreme rays ($Q = \ddot{P}$). This branching rule is based on component bounds on original variables:
+\begin{equation}
+B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, >\} \times \mathbb{R}
+\end{equation}
+\begin{equation}
+\bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = > \\ > & \text{if } \eta = \leq \end{cases}
+\end{equation}
+where $\eta$ is the type of the bound, and $v$ is the value of the bound. Furthermore, $\bar{B}$ describes the inverse component bound of $B$. We can now define a component bound sequence as:
+\begin{equation}
+S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, >\} \times \mathbb{R}}
+\end{equation}
+
+Now use the following shortcut:
+\begin{equation}
+\eta(x_i, v) \Leftrightarrow
+\begin{cases}
+x_i \leq v & \text{if } \eta = \leq \\
+x_i > v & \text{if } \eta = >
+\end{cases}
+\end{equation}
+
+For a given component bound sequence $S$, a set of columns $Q$, we can define the restriction of $Q$ to $S$, i.e. all columns that satisfy $S$, as:
+\begin{equation}
+Q(S) \coloneqq \left\{ q \in Q \mid \forall \left( x_i, \eta, v \right) \in S. \eta(x_i, v) \right\}
+\end{equation}
+Note that $Q(\emptyset) = Q$.
+
+We now reduce the problem of finding a subset $Q'$ to finding a component bound sequence $S$, for which the following holds:
+\begin{itemize}
+\item $\sum_{q \in Q(S)} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}$
+\item $y = 1 \Leftrightarrow \vec{x} \in Q(S)$ is expressible using a finite set of linear constraints
+\end{itemize}
+
+We can show that we can always find a component bound sequence $S$ for which the first condition holds.
+
+\begin{proof}\label{pr:cg_bp_bp}
+Let $Q_{fraq} \coloneqq \{ q \in Q \mid \lambda_q^* \not\in \mathbb{Z} \} \neq \emptyset$ be the set of columns with currently fractional master variables. Then take $q* \coloneqq \arg\min_{q \in Q_{fraq}} \vec{x}_q$ as any minimal undominated column in $Q_{fraq}$.
+From $q*$, we can now construct a component bound sequence $S$, which is only satisfied by $q*$ out of all $q \in Q_{fraq}$, as follows:
+\begin{equation}
+S \coloneqq \left\{ \left( x_i, \leq, \floor{x_{q*}} \right) \mid x_i \in \{x_j \mid q_j \in Q_{fraq}\} \right\}
+\end{equation}
+By construction, $Q(S) = \{q*\}$, and thus $\sum_{q \in Q(S)} \lambda_q^* = \lambda_{q*}^* \not\in \mathbb{Z}$.
+\end{proof}
+
+Vanderbeck chooses to strictly divide up the solution space, i.e. the polyhedron, along the component bounds into multiple sub-polyhedra. In this way, each child branch will be able to only generate points within its own sub-polyhedron, and the master solution will be forced to be integrally within one of these sub-polyhedra. In fact, this scheme closely resembles dichotomous branching in branch-and-bound, where the solution space is divided into two halves. For a given component bound sequence $S = \{B_1, \dots, B_m\}$, where each variable $x_i$ has at least one upper and one lower component bound, there are up to $2^n$ possible sub-polyhedra. As an exponential increase in nodes is undesirable, we can instead group some sub-polyhedra together, creating a total of $n + 1$ nodes. Each of the $1 \leq j \leq m+1$ nodes is now modified in the following way: first define the component bound sequence $S_j$ for the $j$-th node as:
+\begin{equation}
+S_j \coloneqq
+\begin{cases}
+\{B_1, \dots, B_{j-1}, \bar{B_j}\} & \text{if } j \leq m \\
+\{B_1, \dots, B_m\} & \text{if } j = m+1
+\end{cases}
+\end{equation}
+Determine the fractional value $K_j$ for the $j$-th node as:
+\begin{equation}
+K_j \coloneqq \sum_{q \in Q(S_j)} \lambda_q^*
+\end{equation}
+Then, to the \RMP{} of node $j$ add the following constraint:
+\begin{equation}
+\sum_{q \in Q(S_j)} \lambda_q \geq \floor{K_j} \quad \left[\gamma_j\right]
+\end{equation}
+Finally, modify the pricing problem as follows:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma_j} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& {\color{blue} x_i} & {\color{blue} \leq v} & {\color{blue} \forall \left( x_i, \leq, v \right) \in S_j} \\
+&& {\color{blue} x_i} & {\color{blue} > v} & {\color{blue} \forall \left( x_i, >, v \right) \in S_j} \\
+&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation}
+
+\begin{note}
+The modifications made to the pricing problems during Vanderbeck's generic branching still fit the description stated in Equation \eqref{eq:cg_bp_branchmaster_pricingmod}, as they can also be written more formally as:
+\begin{equation}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma_j y} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& {\color{blue} x_i} & {\color{blue} \leq v} & {\color{blue} \forall \left( x_i, \leq, v \right) \in S_j} \\
+&& {\color{blue} x_i} & {\color{blue} > v} & {\color{blue} \forall \left( x_i, >, v \right) \in S_j} \\
+&& {\color{blue} y} & {\color{blue} = 1} \\
+&& \vec{x} & \in \mathbb{Z}_+^n \\
+&& {\color{blue} y} & {\color{blue} \in \{0, 1\}}
+\end{aligned}
+\end{equation}
+\end{note}
+
+The procedure of finding a component bound sequence $S$ as described in Proof \ref{pr:cg_bp_bp} leads to dichotomous branching. As discussed before, branching on a single master variable leads to an extremely unbalanced tree. To overcome this, Vanderbeck proposes a routine that more evenly divides the solution space into multiple branches. To begin with, we initialize the component bound sequence with as $S = \emptyset$ in the root node, and otherwise set it equal to the component bound sequence of the parent node. Then, we iteratively add component bounds to $S$ as follows:
+\begin{algorithm}
+\caption{Vanderbeck's Generic Branching Separation Routine}
+\KwIn{parentnode}
+\KwOut{S}
+\uIf{parentnode = null}{
+	$S \leftarrow \emptyset$\;
+}
+\Else{
+	$S \leftarrow$ parentnode.S\;
+}
+\Loop{
+	$\vec{\alpha} \leftarrow \sum_{q \in Q(S)} \vec{x}_{q} \lambda_q^*$\;
+	\If{$\forall 1 \leq i \leq n. \alpha_i \in \mathbb{Z}$}{
+		\Return{S}\;
+	}
+	$i \leftarrow \operatorname{any}(i \mid \alpha_i \not\in \mathbb{Z})$\;
+	\uIf{$\operatorname{Choose}(i)$}{
+		$S \leftarrow S \cup \left\{ \left( x_i, \leq, \floor{x_i^*} \right) \right\}$\;
+	}
+	\Else{
+		$S \leftarrow S \cup \left\{ \left( x_i, >, \floor{x_i^*} \right) \right\}$\;
+	}
+}
+\end{algorithm}
+
+This presentation of Vanderbeck's generic branching scheme just covers the main ideas and concepts used. For a more in depth derivation of this rule, more detailed descriptions about the actual routines, and further optimizations such as node pruning, we refer to \cite{vanderbeck1996exact, vanderbeck2010reformulation, vanderbeck2011branching, schmickerath2012experiments}.

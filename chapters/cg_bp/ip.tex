@@ -32,8 +32,8 @@ From here, there are two ways to proceed. The straightforward approach, called \
 As we have seen in Section \ref{sec:cg_bp_dwr}, we can reformulate the polyhedron $\polyhedron{D}$, which is now the integer hull defined by the constraints $\mat{D} \vec{x} \geq \vec{d}$, using the Nemhauser-Wolsey Theorem (Theorem \ref{th:nemhauser-wolsey}). This gives us a master problem, where the original variables $\vec{x}$ are represented as a convex combination of extreme points and extreme rays of $\polyhedron{D}$:
 \begin{equation}
 \begin{aligned}
-z^*_\MP{} = &\min & \sum_{p \in P} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
-&\st & \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \vec{a}_p \lambda_p &+ &\sum_{r \in R} \vec{a}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
 && \sum_{p \in P} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
 && \lambda_p & & & \geq 0 & & \forall p \in P \\
 && & & \lambda_r & \geq 0 & & \forall r \in R \\
@@ -59,8 +59,8 @@ $\lambda$ solutions to the \MP{} might lead to fractional $\vec{x}$ solutions. I
 In the discretization approach, we use the adaption of the Nemhauser-Wolsey Theorem to integer polyhedra (Theorem \ref{th:nemhauser-wolsey-integer}) to reformulate the polyhedron $\polyhedron{D}$, yielding the following master problem:
 \begin{equation}
 \begin{aligned}
-z^*_\MP{} = &\min & \sum_{p \in \ddot{P}} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
-&\st & \sum_{p \in \ddot{P}} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+z^*_\MP{} = &\min & \sum_{p \in \ddot{P}} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_r & & & \\
+&\st & \sum_{p \in \ddot{P}} \vec{a}_p \lambda_p &+ &\sum_{r \in R} \vec{a}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
 && \sum_{p \in \ddot{P}} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
 && \lambda_p & & & \in \{0, 1\} & & \forall p \in \ddot{P} \\
 && & & \lambda_r & \in \mathbb{Z}_+ & & \forall r \in R \\

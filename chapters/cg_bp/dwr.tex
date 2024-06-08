@@ -26,12 +26,21 @@ After applying the Nemhauser-Wolsey Theorem (Theorem \ref{th:nemhauser-wolsey}) 
 \mat{A} \vec{x} &= \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p + \sum_{r \in R} \mat{A} \vec{x}_r \lambda_r
 \end{aligned}
 \end{equation}
+Let us also use the following shorthand notations:
+\begin{equation}
+\begin{aligned}
+c_p &\coloneqq \vec{c}\transpose \vec{x}_p
+&c_r &\coloneqq \vec{c}\transpose \vec{x}_r \\
+\vec{a}_p &\coloneqq \mat{A} \vec{x}_p
+&\vec{a}_r &\coloneqq \mat{A} \vec{x}_r
+\end{aligned}
+\end{equation}
 
 As a result, we have obtained a new \MP{} equivalent to the \LP{}:
 \begin{equation}
 \begin{aligned}
-z^*_\MP{} = &\min & \sum_{p \in P} \vec{c}\transpose \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{c}\transpose \vec{x}_r \lambda_r & & & \\
-&\st & \sum_{p \in P} \mat{A} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \mat{A} \vec{x}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
+z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_r & & & \\
+&\st & \sum_{p \in P} \vec{a}_p \lambda_p &+ &\sum_{r \in R} \vec{a}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
 && \sum_{p \in P} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
 && \lambda_p & & & \geq 0 & & \forall p \in P \\
 && & & \lambda_r & \geq 0 & & \forall r \in R \\
