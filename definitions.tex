@@ -50,3 +50,7 @@
 \let\oldnorm\norm
 \def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
 \makeatother
+
+\let\oldbar\bar
+\newcommand{\ubar}[1]{{\underaccent{\oldbar}{#1}}}
+\renewcommand{\bar}[1]{{\oldbar{#1}}}

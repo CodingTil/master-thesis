@@ -1,5 +1,6 @@
 \chapter{Component Bound Branching}\label{ch:cmpbnd}
+In this chapter we will present the \textbf{component bound branching rule} (\texttt{COMPBND}) for branching on the master variables of the discretized reformulation of any type of bounded \IP{}. Building upon the same fundamental ideas of Vanderbeck's generic branching scheme (Section \ref{sec:cg_bp_bp_branching_generic}), our goal with this new branching rule is to provide a simpler alternative to branching on component bounds. In the following, we will first present how we can enforce component bounds in such a way that leads to a binary branch-and-bound search tree. Afterwards, we will dive into the algorithm responsible for finding suitable branching decisions, and finally, we will highlight notable similarities and differences between Vanderbeck's generic branching scheme and our new approach.
 
 \input{chapters/cmpbnd/overview}
 \input{chapters/cmpbnd/separation}
-\input{chapters/cmpbnd/parameterizations}
+\input{chapters/cmpbnd/simdif}
