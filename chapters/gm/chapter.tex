@@ -1,6 +1,20 @@
 \chapter{Master Constraints without corresponding Original Problem Constraints}\label{ch:gm}
+Besides implementing the component bound branching rule (Chapter \ref{ch:cmpbnd}), a major goal of this thesis is to allow future \GCG{}-developers to easily create new branching rules and separators within the framework (Section \ref{sec:tools_gcg}). In the current state of \GCG{} this is very limited: branching rules, for example, must either produce branching decisions formulated in the original problem, which can then be Dantzig-Wolfe reformulated and added to the master and pricing problem, as seen when branching on original variables (Section \ref{sec:cg_bp_bp_branching_original}), or they must only produce constraints for the master problem without requiring modification to the pricing problem, as seen with Ryan-Foster branching. Other branching rules, such as Vanderbeck's generic branching scheme (Section \ref{sec:cg_bp_bp_branching_generic}), cannot be implemented without significant changes to the \GCG{} framework. Such significant changes, in the case of Vanderbeck's branching, would for example be applying and removing the components bounds in the pricing problem when a B\&B-node is entered or left. Also, our proposed component bound branching rule (Chapter \ref{ch:cmpbnd}) as well as separators using the master problem (Section \ref{sec:cg_bp_bpc_separators_master}) would require such changes. The reason for this is that \GCG{} itself does not provide a way to impose constraints in the master problem that require modification to at least one \SP{}, where the master constraints and induced pricing problem modifications are not product of a Dantzig-Wolfe reformulation of the original problem, i.e. do not necessarily have a counterpart in the original problem. In this chapter we will specify the notation of such constraints, which we will henceforth refer to as \textbf{generic mastercuts}, present our integration of these constraints into the \GCG{} framework as part of a new interface, and finally show how we can apply dual value stabilization to these constraints.
 
-\input{chapters/gm/definition}
-\input{chapters/gm/application}
-\input{chapters/gm/dvs}
+Let us first define the concept of a generic mastercut, the concept that unites Vanderbeck's generic branching scheme, our component bound branching rule, and any master separators.
+
+\begin{definition}
+A \textbf{generic mastercut} is a constraint in the master problem that does not have a counterpart in the original problem, and therefore requires modification to one or multiple \SP{} to ensure its validity in the master.
+\end{definition}
+
+\begin{definition}
+A \textbf{pricing modification} to the subproblem $\SP{k}$ in block $k$, that is assiciated with a generic mastercut with dual value $\gamma$, is a set of constraints and a set of variables that are added to the subproblem to ensure validity of the generic mastercut in the master problem.
+
+Every pricing modification contains at least one mandatory variable $y$ that has an objective coefficient of $-\gamma$ in the $\SP{k}$. The solution value of $y$ is used as the column entry for the master constraint of the generic mastercut. For this reason, $y$ is known as the \textbf{coefficient variable} of the pricing modification. All additional variables will take on an auxiliary role in the pricing problem and have an objective coefficient of zero.
+\end{definition}
+
+// TODO: which places do we add them?
+// TODO: how can we use them in branching rules?
+
 \input{chapters/gm/sync}
+\input{chapters/gm/dvs}

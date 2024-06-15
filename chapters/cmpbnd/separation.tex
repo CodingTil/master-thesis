@@ -69,3 +69,9 @@ Since there are endless combinations of heuristics for selecting a component and
 
 \subsection{Post-processing of Component Bound Sequences}\label{sec:cmpbnd_separation_postprocessing}
 There is no guarantee that the separation procedure will find a component bound sequence $S$ in which each component $x_i$ has at most one upper bound (lower bound analogous). While this is not a problem from a mathematical standpoint, only the least upper bound is actually relevant, and so adding variables and constraints for the other upper bounds is unnecessary, and could potentially slow down the solving process of the \SP{}. Therefore, post-processing of the component bound sequences, i.e. removing redundant bounds, is advisable.
+
+
+\subsection{Branching with Multiple Subproblems}\label{sec:cmpbnd_separation_branching}
+The component bound branching rule as described above can be applied to instances with a single subproblem, as well as instances with multiple identical subproblems aggregated into a single subproblem (see Section \ref{sec:cg_bp_idsp}). There are, however, instances consists of at least two distinct (aggregated) subproblems, also known as blocks, where the master problem yields a solution ${\vec{\lambda}^k}^*_\RMP{}$ for each block $k$. Since each component $x_i$ belongs to a specific block, not all columns $q_1, q_2$ in \RMP{} will have an entry for $x_i$, thus the separation scheme is not directly applicable across multiple blocks.
+
+Given that more than one blocks have fractional master solutions, we propose to pick one of those blocks to branch on, and then apply the separation procedure as described above within the selected block.

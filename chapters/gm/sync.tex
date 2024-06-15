@@ -1,5 +1,37 @@
 \section{Mastervariable Synchronization across the entire B\&B-Tree}\label{sec:gm_sync}
-\subsection{Problem Statement}\label{subsec:gm_sync_problem}
+\begin{figure}[H]
+\centering
+\tikzset{every tree node/.style={minimum width=2em,draw,circle},
+			blank/.style={draw=none},
+			edge from parent/.style=
+			{draw,edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}},
+			level distance=1.5cm, sibling distance=2.5em}
+\begin{tikzpicture}
+\Tree
+[.A
+	[.B
+		[.D ]
+		[.E ]
+	]
+	[.C
+		[.F ]
+		[.G ]
+	]
+]
+\end{tikzpicture}
+\caption{An exemplary B\&B-tree, created by the component bound branching rule, where the lexicographic order of the nodes resembles the order in which they were created.}
+\label{fig:gm_sync_tree}
+\end{figure}
+
+Generic mastercuts that are used as branching decisions need to be aware of all columns that currently exist in the \RMP{}, e.g. in the case of component bound branching (Chapter \ref{ch:cmpbnd}), all columns that satisfy the branching decision must have a coefficient of $1$ for the mastercut. This can be easily achieved when creating the branching decision, i.e. when creating the mastercut, and could be done automatically when a new column is generated in the subtree of the node where the branching decision was made. However, consider the following case in a branch-and-bound tree generated with the component bound branching rule (Figure \ref{fig:gm_sync_tree}): we currently process node F in the B\&B-tree and within that node generate a new column $q'$. Afterwards, we deactivate node F and activate node D. Now it could be that $x_{q'}$ satisfies the component bounds imposed in D, i.e. $q'$ should have a coefficient of $1$ in the mastercut of D. However, since the column was generated in F, it is not known to D, which might invalidate the mastercut of D.
+
+To prevent this, we must make the branching decisions aware of these columns such that they can update their coefficients accordingly. In particular, we would like to synchronize newly generated master variables across the entire B\&B-tree lazily, i.e. only when a node is being activated. Furthermore, in \GCG{} master variables that are deemed unnecessary can be removed from the master problem. Deleted variables do not have to be synchronized.
+
+In this section, we will first analyze the current approach taken by the implementation of Vanderbeck's generic branching in \GCG{}. Afterwards, we will present a more efficient approach accomplishing this task, which we will refer to as \textbf{history tracking}, and further optimize it.
+
 \subsection{Current Approach used by the Implementation of Vanderbeck's Generic Branching}\label{subsec:gm_sync_current}
+
+
+
 \subsection{History Tracking Approach}\label{subsec:gm_sync_history}
 \subsection{History Tracking  using Unrolled Linked Lists Approach}\label{subsec:gm_sync_history_unrolled}
