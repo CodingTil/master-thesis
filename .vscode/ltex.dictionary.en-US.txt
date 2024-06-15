@@ -8,3 +8,4 @@ subproblems
 convexification
 Dantzig-Wolfe
 subproblem
+fractionality

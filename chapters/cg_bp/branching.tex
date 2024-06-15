@@ -120,7 +120,9 @@ We now reduce the problem of finding a subset $Q'$ to finding a component bound 
 \item $y = 1 \Leftrightarrow \vec{x} \in Q(S)$ is expressible using a finite set of linear constraints
 \end{itemize}
 
-We can show that we can always find a component bound sequence $S$ for which the first condition holds.
+\begin{proposition}
+If $\vec{\lambda}^*_\RMP{}$ is a fractional solution to the master problem, then there exists a component bound sequence $S$ for which the first condition holds.
+\end{proposition}
 
 \begin{proof}\label{pr:cg_bp_bp}
 Let $Q_{fraq} \coloneqq \{ q \in Q \mid \lambda_q^* \not\in \mathbb{Z} \} \neq \emptyset$ be the set of columns with currently fractional master variables. Then take $q* \coloneqq \arg\min_{q \in Q_{fraq}} \vec{x}_q$ as any minimal undominated column in $Q_{fraq}$.

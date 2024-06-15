@@ -1,10 +1,71 @@
 \section{Separation Procedure}\label{sec:cmpbnd_separation}
-TODO
-
 \begin{definition}
 The \textbf{fractionality of} $\vec{\lambda}^*_\RMP{}$ \textbf{ with respect to } $S$ is given by:
-\begin{equation*}
+\begin{equation}\label{eq:cmpbnd_fractionality}
 F_S = \sum_{q \in \mathcal{Q}(S)} \left( \lambda_q^* - \floor{\lambda_q^*} \right) \geq 0
-\end{equation*}
+\end{equation}
 \end{definition}
 
+When $S = \emptyset$, we have $Q(S) = Q$, and thus $F_S > 0$, since at least one $\lambda_q^*$ is fractional. In particular, $F_S \in \mathbb{Z}_+ \setminus \{0\}$ in this case, due to the convexity constraint $\sum_{q \in Q} \lambda_q = 1$ in the \MP{} (analogous in aggregated subproblems, see Section \ref{sec:cg_bp_idsp}).
+
+Now take $S \neq \emptyset$, one of three cases can occur:
+\begin{itemize}
+\item	$F_S = 0$: $Q(S)$ contains no column with fractional $\lambda_q^*$. Thus, branching on $S$ would not cut off the current fractional solution $\vec{\lambda}^*_\RMP{}$. Adding further component bounds to $S$ would not change this.
+\item	$a < F_S < a + 1, a \in \mathbb{Z}_+$. Using Equation \eqref{eq:cmpbnd_fractionality} we can now rewrite this as:
+		\begin{equation}
+		\sum_{q \in \mathcal{Q}(S)} \floor{\lambda_q^*} < \sum_{q \in \mathcal{Q}(S)} \lambda_q^* < \sum_{q \in \mathcal{Q}(S)} \floor{\lambda_q^*} + 1
+		\end{equation}
+		We observe the sum $\sum_{q \in \mathcal{Q}(S)} \lambda_q^* \eqcolon K$ to be fractional, which enables us to branch on $S$ (see Equation \eqref{eq:compbnd_branching_master}).
+\item	$F_S \in \mathbb{Z}_+ \setminus \{0\}$. In this case, $\sum_{q \in \mathcal{Q}(S)} \lambda_q^* \in \mathbb{Z}_+$, and therefore branching on $S$ would not cut off the current fractional solution. However, using \ref{note:distinct_columns}, we can find two distinct columns $q_1, q_2 \in Q(S)$, i.e. where $x_{i,q_1} < x_{i,q_2}$ for some $i \in \{1, \dots, n\}$, such that $\lambda_{q_1}^*$ and $\lambda_{q_2}^*$ are fractional. If we denote the rounded median of these two column entries as $v \coloneqq \floor{\frac{x_{i,q_1} + x_{i,q_2}}{2}}$, observe that $x_{i,q_1} \leq v < v + 1 \leq x_{i,q_2}$, and therefore we can now separate $q_1$ from $q_2$ by imposing a bound on the component $x_i$, i.e. expand $S$ to either $S_1$ or $S_2$, where:
+		\begin{equation}
+		\begin{aligned}
+		S_1 &\coloneqq S \cup \{\left( x_i, \leq, v \right)\}\\
+		S_2 &\coloneqq S \cup \{\left( x_i, \geq, v + 1 \right)\}
+		\end{aligned}
+		\end{equation}
+		Note, that $F_S = F_{S_1} + F_{S_2}$, and therefore we can always halve the fractionality of the current solution with respect to the current component bound sequence. Furthermore, both $Q(S_1)$ and $Q(S_2)$ are guaranteed to contain at least one fractional column, thus $F_{S_1}, F_{S_2} > 0$.
+\end{itemize}
+
+These observations suggest the following separation procedure: Initialize $S^0 = \emptyset$, i.e. $F_{S^0} > 0$. While $F_{S^k} \in \mathbb{Z}_+ \setminus \{0\}$, find a component bound $x_i$ to branch on, yielding $S_1$ and $S_2$. Proceed with either as $S^{k+1}$. Finally, $F_{S^k}$ will be fractional, and we can branch on $S^k$.
+
+\begin{proposition}
+At no iteration $k \geq 0$ will the separation procedure produce a component bound sequence $S^k$ with $F_{S^k} = 0$.
+\end{proposition}
+
+\begin{proof}
+As previously discussed, $F_\emptyset > 0$, i.e. $S^0$ satisfies the proposition.
+
+Assume $S^k$ satisfies the proposition, i.e. $F_{S^k} > 0$. If $F_{S^k} \not\in \mathbb{Z}_+$, the procedure terminates, and the proposition holds. Else $F_{S^k} \not\in \mathbb{Z}_+ \setminus \{0\}$. In this case, let us assume $F_{S^{k+1}} = 0$. Then $Q(S^{k+1})$ contains no fractional columns, which contradicts the design of $S^{k+1}$. By contradiction $F_{S^{k+1}} > 0$ must hold, and by induction the proposition holds.
+\end{proof}
+
+\begin{proposition}
+Given that $\vec{\lambda}^*_\RMP{}$ contains finitely many non-zero values, the separation procedure will terminate after a finite number of iterations.
+\end{proposition}
+
+\begin{proof}
+Let us denote the restriction of $Q(S)$ to the columns $q$ with fractional $\lambda_q^*$ as $Q_f(S)$. By our assumption $\abs{Q_f(S)} < \infty$. At each iteration $k$, we only remove columns from $Q_f(S^k)$, i.e. $\abs{Q_f(S^{k+1})} < \abs{Q_f(S^k)}$. Since $\abs{Q_f(S^0)} < \infty$, the separation procedure must terminate after a finite number of iterations.
+\end{proof}
+
+
+\subsection{Choice of Component Bounds}\label{sec:cmpbnd_separation_choice}
+The separation procedure as described above is not complete yet, as we have not yet defined on which of oftentimes multiple components $x_i$ we impose which bounds. This choice can have a significant impact on the performance of the subsequent solving of the child nodes: In the worst case, the separation procedure will yield a component bound sequence $S$ for which $Q(S)$ only contains one column. Maintaining balance within the branch-and-bound tree is generally thought to be beneficial, however the time required to find a suitable $S$ can be significant, and must be traded off against the time saved by having a balanced tree.
+
+There are numerous heuristics for selecting a component to separate on, for example choosing the component that has the most distinct values within all fractional columns of $Q(S^k)$, and there are countless possibilities for deciding which bound to impose on the selected component $x_i$, such as imposing lower bounds only if $v - x_{i,q_1} < x_{i,q_2} - v$, or choosing the component bound sequence for which $\abs{Q(S)}$ is larger.
+
+We propose choosing the component $x_i$ for which:
+\begin{equation*}
+\begin{aligned}
+max_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\max} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
+min_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\min} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
+x_i &= \underset{j \in \{1, \dots, n\}}{\arg\max} \; max_j - min_j & \\
+v &\coloneqq \frac{max_i - min_i}{2} &
+\end{aligned}
+\end{equation*}
+i.e. $x_i$ is the component with the largest range dispersion within the fractional columns of $Q(S^k)$. With this heuristic we hope to subdivide the domain of the original variables as evenly as possible, and therefore maintain a balanced branch-and-bound tree.
+
+After we have selected a component $x_i$ to branch on, we propose to proceed with the component bound on $x_i$, i.e. either $\left( x_i, \leq, v \right)$ or $\left( x_i, \geq, v + 1 \right)$, for which the resulting component bound sequence $S$ has the least fractionality. This choice is motivated by the fact that we then always at least halve the fractionality of the current selection, eventually falling between $0$ and $1$. Making use of this property, we expect to reduce the number of iterations required to find a suitable $S$, thus reducing the processing time, and also possibly minimizing the size of $S$, which decreases the amount of variables and constraints to be added to the \SP{}.
+
+Since there are endless combinations of heuristics for selecting a component and a bound, one could alternatively rewrite the separation procedure as a recursive algorithm which returns (a subset of) all possible component bound sequences. From this selection, one could then choose some $S$ to branch on, though even here the choice of $S$ is not unique. One could also prepare a set of promising component bound sequences and then apply the strong branching heuristic to continue with the candidate that gives the best progress \cite{achterberg2005branching}.
+
+\subsection{Post-processing of Component Bound Sequences}\label{sec:cmpbnd_separation_postprocessing}
+There is no guarantee that the separation procedure will find a component bound sequence $S$ in which each component $x_i$ has at most one upper bound (lower bound analogous). While this is not a problem from a mathematical standpoint, only the least upper bound is actually relevant, and so adding variables and constraints for the other upper bounds is unnecessary, and could potentially slow down the solving process of the \SP{}. Therefore, post-processing of the component bound sequences, i.e. removing redundant bounds, is advisable.

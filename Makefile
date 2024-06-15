@@ -1,5 +1,5 @@
 default:
-	latexmk -pdf -lualatex thesis.tex
+	latexmk -pdf -lualatex -halt-on-error thesis.tex
 
 .PHONY: default clean
 
