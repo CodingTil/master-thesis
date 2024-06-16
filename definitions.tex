@@ -58,3 +58,4 @@
 \let\oldbar\bar
 \newcommand{\ubar}[1]{{\underaccent{\oldbar}{#1}}}
 \renewcommand{\bar}[1]{{\oldbar{#1}}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
