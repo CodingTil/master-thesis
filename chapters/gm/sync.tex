@@ -71,7 +71,7 @@ Furthermore, this approach is not very developer friendly. In our opinion, the d
 \draw[->,dashed] (node5.one split south) ++(0,-1) node[below,draw=none] {\texttt{Latest}} -- ++(0,1);
 
 \end{tikzpicture}
-\caption{Reference-Counted Linked List of the History of Columns added to the \RMP{}, with external references drawn dashed from below, e.g. those from the B\&B-tree nodes A, B, and C. Each element holds a reference to the master variable belonging to column $q_i$, as well as the number of references to itself.}
+\caption{Reference-counted linked list of the history of columns added to the \RMP{}, with external references drawn dashed from below, e.g. those from the B\&B-tree nodes A, B, and C. Each element holds a reference to the master variable belonging to column $q_i$, as well as the number of references to itself.}
 \label{fig:gm_sync_history}
 \end{figure}
 
@@ -277,11 +277,11 @@ We can combine these two ideas by unrolling our linked list into blocks storing 
 \draw[->] (node0.two east) -- (node1.one west);
 
 % External references
-\draw[->,dashed] (node0.three south) ++(-0.8,-1) node[below,draw=none] {C,0} -- ++(0.7,1);
-\draw[->,dashed] (node0.three south) ++(0,-1) node[below,draw=none] {A,2} -- ++(0,1);
-\draw[->,dashed] (node0.three south) ++(0.8,-1) node[below,draw=none] {B,2} -- ++(-0.7,1);
-\draw[->,dashed] (node1.three south) ++(-1,-1) node[below,draw=none] {\textit{other},0} -- ++(0.9,1);
-\draw[->,dashed] (node1.three south) ++(1,-1) node[below,draw=none] {\texttt{Latest},2} -- ++(-0.9,1);
+\draw[->,dashed] (node0.three south) ++(-1.8,-1) node[below,draw=none] {C,0} -- ++(1.6,1);
+\draw[->,dashed] (node0.three south) ++(-0.9,-1) node[below,draw=none] {A,2} -- ++(0.8,1);
+\draw[->,dashed] (node0.three south) ++(0,-1) node[below,draw=none] {B,2} -- ++(0,1);
+\draw[->,dashed] (node0.three south) ++(1.2,-1) node[below,draw=none] {\textit{other},3} -- ++(-1.1,1);
+\draw[->,dashed] (node1.three south) ++(0,-1) node[below,draw=none] {\texttt{Latest},1} -- ++(0,1);
 
 \end{tikzpicture}
 \caption{\texttt{varhistory} of Figure \ref{fig:gm_sync_history} unrolled into blocks of size 4.}
