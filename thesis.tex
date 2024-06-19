@@ -51,6 +51,10 @@
 \usepackage{multicol} % Multiple columns
 \usepackage{accents} % Math accentsdef
 \usepackage{ulem} % Underlining
+\usepackage{etoolbox} % Patching
+
+\BeforeBeginEnvironment{algorithm}{\normalem}
+\AfterEndEnvironment{algorithm}{\ULforem}
 
 \usetikzlibrary{arrows.meta,positioning,shapes.multipart}
 

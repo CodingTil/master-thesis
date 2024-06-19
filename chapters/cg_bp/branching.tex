@@ -89,14 +89,14 @@ Aggregation of subproblems (Section \ref{sec:cg_bp_idsp}) is not of an issue dur
 \subsubsection{Vanderbeck's Generic Branching Scheme}\label{sec:cg_bp_bp_branching_generic}
 Vanderbeck has proposed an elaborate scheme (\texttt{GENERIC}) to find such a subset $Q'$ in the master solution, which can be used to branch on the master variables for any type of bounded \IP{}, i.e. which has no extreme rays ($Q = \ddot{P}$). This branching rule is based on component bounds on original variables:
 \begin{equation}
-B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, >\} \times \mathbb{R}
+B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}
 \end{equation}
 \begin{equation}
-\bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = > \\ > & \text{if } \eta = \leq \end{cases}
+\bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = \geq \\ \geq & \text{if } \eta = \leq \end{cases}
 \end{equation}
 where $\eta$ is the type of the bound, and $v$ is the value of the bound. Furthermore, $\bar{B}$ describes the inverse component bound of $B$. We can now define a component bound sequence as:
 \begin{equation}
-S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, >\} \times \mathbb{R}}
+S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}}
 \end{equation}
 
 Let us further introduce the following shorthand notation:
@@ -104,7 +104,7 @@ Let us further introduce the following shorthand notation:
 \eta(a, v) \Leftrightarrow
 \begin{cases}
 a \leq v & \text{if } \eta = \leq \\
-a > v & \text{if } \eta = >
+a \geq v & \text{if } \eta = \geq
 \end{cases}
 \end{equation}
 
@@ -154,8 +154,8 @@ Finally, modify the pricing problem as follows:
 \begin{aligned}
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma_j} - \pi_0 & \\
 &\st & \mat{D} \vec{x} & \geq \vec{d} \\
-&& {\color{blue} x_i} & {\color{blue} \leq \floor{v}} & {\color{blue} \forall \left( x_i, \leq, v \right) \in S_j} \\
-&& {\color{blue} x_i} & {\color{blue} \geq \floor{v} + 1} & {\color{blue} \forall \left( x_i, >, v \right) \in S_j} \\
+&& {\color{blue} x_i} & {\color{blue} \leq v} & {\color{blue} \forall \left( x_i, \leq, v \right) \in S_j} \\
+&& {\color{blue} x_i} & {\color{blue} \geq v} & {\color{blue} \forall \left( x_i, \geq, v \right) \in S_j} \\
 && \vec{x} & \in \mathbb{Z}_+^n
 \end{aligned}
 \end{equation}
@@ -167,7 +167,7 @@ The modifications made to the pricing problems during Vanderbeck's generic branc
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma_j y} - \pi_0 & \\
 &\st & \mat{D} \vec{x} & \geq \vec{d} \\
 && {\color{blue} x_i} & {\color{blue} \leq v} & {\color{blue} \forall \left( x_i, \leq, v \right) \in S_j} \\
-&& {\color{blue} x_i} & {\color{blue} > v} & {\color{blue} \forall \left( x_i, >, v \right) \in S_j} \\
+&& {\color{blue} x_i} & {\color{blue} \geq v} & {\color{blue} \forall \left( x_i, \geq, v \right) \in S_j} \\
 && {\color{blue} y} & {\color{blue} = 1} \\
 && \vec{x} & \in \mathbb{Z}_+^n \\
 && {\color{blue} y} & {\color{blue} \in \{0, 1\}}
@@ -196,7 +196,7 @@ The procedure of finding a component bound sequence $S$ as described in Proof \r
 		$S \leftarrow S \cup \left\{ \left( x_i, \leq, \floor{x_i^*} \right) \right\}$\;
 	}
 	\Else{
-		$S \leftarrow S \cup \left\{ \left( x_i, >, \floor{x_i^*} \right) \right\}$\;
+		$S \leftarrow S \cup \left\{ \left( x_i, \geq, \floor{x_i^*} + 1 \right) \right\}$\;
 	}
 }
 \end{algorithm}

@@ -23,7 +23,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{equation}
 where $y$ becomes the column entry for the row added to the master, and $y = 1 \Leftrightarrow \vec{x} \in Q'$ is expressible using a finite set of linear constraints.
 
-For finding such a $Q'$, which is expressible in the \SP{}, Vanderbeck uses bounds on the original variables (Section \ref{sec:cg_bp_bp_branching_generic}). Similar, we introduce a variation of component bounds on the original variables. Notably, instead of allowing fractional bounds, we now require integral bound values, and therefore enabling us to use $\geq$ instead of $>$.
+For finding such a $Q'$, which is expressible in the \SP{}, Vanderbeck uses bounds on the original variables. Similarly, in our branching scheme we also find such component bounds. Let us reiterate the notation that was introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
 \begin{equation}
 B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}
 \end{equation}
@@ -31,7 +31,7 @@ B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times 
 \bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = \geq \\ \geq & \text{if } \eta = \leq \end{cases}
 \end{equation}
 
-Again, we define a component bound sequence:
+Again, we define a component bound sequence as follows:
 \begin{equation}
 S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}}
 \end{equation}
@@ -43,7 +43,7 @@ as well as restrictions of $S$ to only upper bounds $\bar{S}$ and lower bounds $
 \end{aligned}
 \end{equation}
 
-We now redefine the following shorthand notation:
+And finally, we still use the following shorthand notation:
 \begin{equation}
 \eta(a, v) \Leftrightarrow
 \begin{cases}

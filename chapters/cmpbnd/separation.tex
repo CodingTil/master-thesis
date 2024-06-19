@@ -8,7 +8,7 @@ F_S = \sum_{q \in \mathcal{Q}(S)} \left( \lambda_q^* - \floor{\lambda_q^*} \righ
 
 When $S = \emptyset$, we have $Q(S) = Q$, and thus $F_S > 0$, since at least one $\lambda_q^*$ is fractional. In particular, $F_S \in \mathbb{Z}_+ \setminus \{0\}$ in this case, due to the convexity constraint $\sum_{q \in Q} \lambda_q = 1$ in the \MP{} (analogous in aggregated subproblems, see Section \ref{sec:cg_bp_idsp}).
 
-Now take $S \neq \emptyset$, one of three cases can occur:
+In general, for any $S$ one of three cases can occur:
 \begin{itemize}
 \item	$F_S = 0$: $Q(S)$ contains no column with fractional $\lambda_q^*$. Thus, branching on $S$ would not cut off the current fractional solution $\vec{\lambda}^*_\RMP{}$. Adding further component bounds to $S$ would not change this.
 \item	$a < F_S < a + 1, a \in \mathbb{Z}_+$. Using Equation \eqref{eq:cmpbnd_fractionality} we can now rewrite this as:
