@@ -1,0 +1,4 @@
+limits/time = 600
+limits/nodes = 2100000000
+lp/threads = 1
+timing/clocktype = 1
