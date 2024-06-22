@@ -1,9 +1,12 @@
 \section{Overview of the branching scheme}\label{sec:cmpbnd_overview}
-Recall from Section \ref{sec:cg_bp_bp_branching_master}, given a fractional master solution $\vec{\lambda}^*_\RMP{}$, we can always find a subset $\emptyset \subset Q' \subset Q \coloneqq \ddot{P}$ for which the following holds:
+As discussed in Section \ref{sec:cg_bp_bp_branching_master}, given a fractional master solution $\vec{\lambda}^*_\RMP{}$, we can always find a subset $\emptyset \subset Q' \subset Q \coloneqq \ddot{P}$ such that:
+
 \begin{equation}\label{eq:compbnd_branching_master}
 \sum_{q \in Q'} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
 \end{equation}
-and we therefore can eventually enforce integrality of $\vec{\lambda}_\MP{}$, for example by adding one of the following branching constraints to each child node:
+
+This allows us to eventually enforce the integrality of $\vec{\lambda}_\MP{}$, for example, by adding one of the following branching constraints to each child node:
+
 \begin{equation}
 \begin{aligned}
 \sum_{q \in Q'} \lambda_q \leq \lfloor K \rfloor \quad \left[\gamma\right] \\
@@ -12,6 +15,7 @@ and we therefore can eventually enforce integrality of $\vec{\lambda}_\MP{}$, fo
 \end{equation}
 
 Adding such constraints to the master problem requires us to modify the pricing problem in the following way:
+
 \begin{equation}
 \begin{aligned}
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma y} - \pi_0 & \\
@@ -23,7 +27,8 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{equation}
 where $y$ becomes the column entry for the row added to the master, and $y = 1 \Leftrightarrow \vec{x} \in Q'$ is expressible using a finite set of linear constraints.
 
-For finding such a $Q'$, which is expressible in the \SP{}, Vanderbeck uses bounds on the original variables. Similarly, in our branching scheme we also find such component bounds. Let us reiterate the notation that was introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
+To find such a $Q'$ that is expressible in \SP{}, Vanderbeck uses bounds on the original variables. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
+
 \begin{equation}
 B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}
 \end{equation}
@@ -31,11 +36,13 @@ B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times 
 \bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = \geq \\ \geq & \text{if } \eta = \leq \end{cases}
 \end{equation}
 
-Again, we define a component bound sequence as follows:
+We define a component bound sequence as follows:
+
 \begin{equation}
 S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}}
 \end{equation}
-as well as restrictions of $S$ to only upper bounds $\bar{S}$ and lower bounds $\ubar{S}$ respectively:
+and restrictions of $S$ to only upper bounds $\bar{S}$ and lower bounds $\ubar{S}$ respectively:
+
 \begin{equation}
 \begin{aligned}
 \bar{S} &\coloneqq \left\{ \left( x_{i}, \leq, v \right) \mid \left( x_{i}, \leq, v \right) \in S \right\} \\
@@ -43,7 +50,8 @@ as well as restrictions of $S$ to only upper bounds $\bar{S}$ and lower bounds $
 \end{aligned}
 \end{equation}
 
-And finally, we still use the following shorthand notation:
+We continue using the following shorthand notation:
+
 \begin{equation}
 \eta(a, v) \Leftrightarrow
 \begin{cases}
@@ -52,14 +60,15 @@ a \geq v & \text{if } \eta = \geq
 \end{cases}
 \end{equation}
 
+Similar to Vanderbeck's branching, we can find such a subset $Q'$ by finding a component bound sequence $S$ such that:
 
-Exactly as in Vanderbeck's branching, we can find such a subset $Q'$ by finding a component bound sequence $S$, such that:
 \begin{equation}
 \sum_{q \in Q(S)} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
 \end{equation}
 where $Q(S) \coloneqq \{q \in Q \mid \forall (x_i, \eta, v) \in S. \eta(x_{qi}, v)\}$.
 
-Using an analogous proof as \ref{pr:cg_bp_bp}, it can be shown that such a $S$ always exists if the master solution is not integral. After we have obtained such a $S$, we can now create two child nodes, the down- and up-branches respectively, by first adding the branching decision to the master problem:
+Proof \ref{pr:cg_bp_bp} shows that such an $S$ always exists if the master solution is not integral. After obtaining such an $S$, we create two child nodes, the down- and up-branches, by first adding the branching decision to the master problem:
+
 \begin{multicols}{2}
 \noindent
 \begin{minipage}{\linewidth}
@@ -82,7 +91,7 @@ Using an analogous proof as \ref{pr:cg_bp_bp}, it can be shown that such a $S$ a
 \end{minipage}
 \end{multicols}
 
-We now must ensure that newly priced columns $x_{q'}$ are assigned a coefficient of $y = 1$ for the branching decision if $q' \in Q(S)$, i.e. if $\forall (x_i, \eta, v) \in S. \eta(x_{q'i}, v)$ and otherwise $y = 0$. We achieve this by introducing additional binary variables $\bar{y}_s, \ubar{y}_{s'}$ for each $B_s \in \bar{S}$ and for each $B_{s'} \in \ubar{S}$ respectively, along with the following constraints, in the \SP{}:
+We now must ensure that newly priced columns $x_{q'}$ are assigned a coefficient of $y = 1$ for the branching decision if $q' \in Q(S)$, i.e., if $\forall (x_i, \eta, v) \in S. \eta(x_{q'i}, v)$ and otherwise $y = 0$. We achieve this by introducing additional binary variables $\bar{y}_s, \ubar{y}_{s'}$ for each $B_s \in \bar{S}$ and for each $B_{s'} \in \ubar{S}$ respectively, along with the following constraints, in the \SP{}:
 \begin{equation}
 \begin{aligned}
 y = 1 &\Leftrightarrow \sum_{B_s \in \bar{S}} \bar{y}_s + \sum_{B_s \in \ubar{S}} \ubar{y}_s = \abs{S} &\\
@@ -94,13 +103,15 @@ y &\in \{0, 1\} & \\
 \end{aligned}
 \end{equation}
 
-What remains is expressing all logical equivalences using a finite set of linear constraints. For this, we can use the following observation:
+What remains is to express all logical equivalences using a finite set of linear constraints. For this, we can use the following observations:
+
 \begin{itemize}
-\item Since in the down branch $-\gamma_{\downarrow} \geq 0$, $y$ naturally takes on value $0$ and therefore also all $\bar{y}_s$ and $\ubar{y}_{s'}$. Thus, in the down branch we need to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $1$ if the corresponding component bounds are satisfied, and force $y$ to $1$ if all $\bar{y}_s$ and $\ubar{y}_{s'}$ equal $1$.
-\item In the up branch, the opposite is the case: since $-\gamma_{\uparrow} \leq 0$, $y$ and all $\bar{y}_s, \ubar{y}_{s'}$ naturally take on value $1$, requiring us to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $0$ if their corresponding component bounds are not satisfied, and force $y$ to $0$ if any of the $\bar{y}_s, \ubar{y}_{s'}$ equals $0$.
+\item In the down branch, since $-\gamma_{\downarrow} \geq 0$, $y$ naturally takes the value $0$ and so do all $\bar{y}_s$ and $\ubar{y}_{s'}$. Thus, in the down branch, we need to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $1$ if the corresponding component bounds are satisfied, and force $y$ to $1$ if all $\bar{y}_s$ and $\ubar{y}_{s'}$ equal $1$.
+\item In the up branch, the opposite is the case: since $-\gamma_{\uparrow} \leq 0$, $y$ and all $\bar{y}_s, \ubar{y}_{s'}$ naturally take the value $1$, requiring us to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $0$ if their corresponding component bounds are not satisfied, and force $y$ to $0$ if any of the $\bar{y}_s, \ubar{y}_{s'}$ equals $0$.
 \end{itemize}
 
-Recall, that we require a bounded \IP{} to begin with. Let us denote the lower and upper bound of a variable $x_i$ as $\text{lb}_i$ and $\text{ub}_i$ respectively. Using the above observations, we can now express the logical equivalences mandated by the branching decision as follows:
+Given that we require a bounded \IP{} to begin with, let us denote the lower and upper bounds of a variable $x_i$ as $\text{lb}_i$ and $\text{ub}_i$ respectively. Using the above observations, we can now express the logical equivalences mandated by the branching decision as follows:
+
 \begin{multicols}{2}
 \noindent
 \begin{minipage}{0.95\linewidth}
@@ -132,4 +143,4 @@ y &\leq \ubar{y}_s &\qquad \forall B_s \in \ubar{S} \\
 \end{minipage}
 \end{multicols}
 
-We have now successfully defined the branching decision in the master problem, and the corresponding constraints in the pricing problem. Until we have found an optimal integral solution of master variables, we will continue to branch using a suitable component bound sequence $S$, creating a binary branch-and-bound search tree. In the next section, we will present an algorithm responsible for finding such a $S$ given a fractional master solution $\vec{\lambda}^*_\RMP{}$.
+We have now successfully defined the branching decision in the master problem and the corresponding constraints in the pricing problem. Until we find an optimal integral solution of master variables, we will continue to branch using a suitable component bound sequence $S$, creating a binary branch-and-bound search tree. In the next section, we present an algorithm responsible for finding such an $S$ given a fractional master solution $\vec{\lambda}^*_\RMP{}$.

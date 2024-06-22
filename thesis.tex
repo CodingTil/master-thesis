@@ -19,7 +19,7 @@
 \usepackage{lmodern} % Computer Modern fonts
 \usepackage{microtype} % better typesetting results (avoids underfull / overfull hboxes)
 \usepackage{graphicx} % adding graphics
-\usepackage{units} % typesetting units, e.g. \unit[10]{MB} and \unitfrac[100]{Mbit}{s}
+\usepackage{units} % typesetting units, e.g., \unit[10]{MB} and \unitfrac[100]{Mbit}{s}
 \usepackage{booktabs} % publication quality tables
 \usepackage{titlesec} % Customize chapter and section headings
 \usepackage{setspace} % Set line spacing
@@ -27,10 +27,10 @@
 \usepackage{subcaption} % Subfigures
 \usepackage{float} % Floats
 \usepackage[
-	backend=bibtex,
+	backend=biber,
 	style=numeric-comp,
 	maxcitenames=2,
-	natbib=true,
+	natbib=false,
 	sorting=none
 ]{biblatex} % Bibliography
 \usepackage{hyperref} % Hyperlinks
@@ -50,7 +50,7 @@
 \usepackage{etoolbox} % Patching
 \usepackage{multicol} % Multiple columns
 \usepackage{accents} % Math accentsdef
-\usepackage{ulem} % Underlining
+\usepackage[normalem]{ulem} % Underlining
 \usepackage{etoolbox} % Patching
 
 \BeforeBeginEnvironment{algorithm}{\normalem}
@@ -140,7 +140,9 @@ Finally, the component bound branching rule will be implemented using this new i
 \cleardoublepage
 
 % References
+\normalem
 \printbibliography
+\ULforem
 
 \end{document}
 

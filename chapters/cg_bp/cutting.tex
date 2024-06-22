@@ -1,19 +1,21 @@
 \section{Branch-Price-and-Cut}\label{sec:cg_bp_bpc}
-From solving \IP{}s we know that adding cutting planes, i.e. valid inequalities, can significantly improve the performance of the branch-and-bound algorithm. Such cutting planes can be generated and added to the \LP{} relaxation in any stage of the solving process. This is now known as the branch-and-cut algorithm.
+From solving \IP{}s, we know that adding cutting planes, or valid inequalities, can significantly enhance the performance of the branch-and-bound algorithm. These cutting planes can be generated and added to the \LP{} relaxation at any stage of the solving process, forming the basis of the branch-and-cut algorithm.
 
-We can apply the same idea to branch-and-price: whenever we have a solution for the \LP{} relaxation of the \MP{}, we can add additional valid inequalities to the \RMP{}, hopefully strengthening the relaxation. Therefore, we can extend the branch-and-price algorithm to a branch-price-and-cut algorithm. In general, separators generating cuts for the \MP{} are either operating on the original formulation or within the master problem of the Dantzig-Wolfe reformulation. In the following, we will superficially cover these two types of separators. For more detail about cutting planes for column generation and their effectiveness we refer to \cite{gamrath2010generic, witt2013separation}.
+We can extend this concept to branch-and-price. Whenever we have a solution for the \LP{} relaxation of the \MP{}, we can add additional valid inequalities to the \RMP{}, aiming to strengthen the relaxation. This extension transforms the branch-and-price algorithm into a branch-price-and-cut algorithm. In general, separators generating cuts for the \MP{} operate either on the original formulation or within the master problem of the Dantzig-Wolfe reformulation. We will briefly discuss these two types of separators. For more detailed information about cutting planes for column generation and their effectiveness, refer to \cite{gamrath2010generic, witt2013separation}.
 
 \subsection{Separators using the Original Formulation}
-Assume we have solved the \LP{} relaxation of the \MP{} to optimality using column generation to obtain the master solution $\vec{\lambda}^*$, which can now be projected back into a solution $\vec{x}^*$ of the original formulation. We can now call any separation algorithms that operate on the original formulation to generate cuts of the general form:
+Assume we have solved the \LP{} relaxation of the \MP{} to optimality using column generation to obtain the master solution $\vec{\lambda}^*$, which can be projected back into a solution $\vec{x}^*$ of the original formulation. We can then call any separation algorithms that operate on the original formulation to generate cuts of the general form:
+
 \begin{equation}
 \mat{F}\transpose \vec{x} \geq \vec{f}
 \end{equation}
 
-We can now apply Dantzig-Wolfe reformulation to transform these cuts, for example by adding the following constraints to the \MP{}:
+We can apply Dantzig-Wolfe reformulation to transform these cuts, for example by adding the following constraints to the \MP{}:
 \begin{equation}
 \sum_{p \in P} \mat{F} \vec{x}_p \lambda_p + \sum_{r \in R} \mat{F} \vec{x}_r \lambda_r \geq \vec{f} \quad \left[ \vec{\alpha} \right]
 \end{equation}
 and imposing the constraints in the pricing problem:
+
 \begin{equation}
 \begin{aligned}
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} {\color{blue} - \vec{\alpha}\transpose \mat{F}}\right) \vec{x} - \pi_0 & \\
@@ -22,24 +24,24 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{aligned}
 \end{equation}
 
-In this way, existing separators originally intended for use in a branch-and-cut scenario can be reused to generate cutting planes for the Dantzig-Wolfe reformulation. Some caveats apply, however, for example do some separators rely on a basis solution. Since the Dantzig-Wolfe reformulation might be stronger than the original formulation (see Section \cite{TODO} TODO), an interior point of the polyhedron could be the optimal solution for the relaxed master problem. In this case, the basis solution is not available, and such a separator cannot be applied (directly).
+This approach allows existing separators originally intended for use in a branch-and-cut scenario to be reused to generate cutting planes for the Dantzig-Wolfe reformulation. However, some caveats apply. For example, some separators rely on a basis solution. Since the Dantzig-Wolfe reformulation might be stronger than the original formulation \cite{bastubbe2018computational}, an interior point of the polyhedron could be the optimal solution for the relaxed \RMP{}. In this case, the basis solution is not available, and such a separator cannot be applied directly.
 
 \subsection{Separators using the Master Problem}\label{sec:cg_bp_bpc_separators_master}
-Recall that through discretization we obtain a \MP{} with integral master variables. To strengthen the \LP{} relaxation of the \MP{}, we would also like to cut off some fractional solutions. Unfortunately, applying an ordinary branch-and-cut separator to a solution of the \RMP{} is undesirable: such cuts would only be defined for variables currently contained in the \RMP{}. Instead, we have to find cuts over all variables in \MP{}, i.e. cuts that can also be imposed in the subproblem to limit which columns can be generated. More formally, we would like to find a function $\operatorname{g}: \mathbb{R}^n \to \mathbb{R}$ such that the cut is expressible as:
+Through discretization, we obtain a \MP{} with integral master variables. To strengthen the \LP{} relaxation of the \MP{}, we aim to cut off some fractional solutions. Unfortunately, applying an ordinary branch-and-cut separator to a solution of the \RMP{} is undesirable: such cuts would only be defined for variables currently contained in the \RMP{}. Instead, we need cuts over all variables in the \MP{} that can also be imposed in the subproblem to limit which columns can be generated. Formally, we seek a function $\operatorname{g}: \mathbb{R}^n \to \mathbb{R}$ such that the cut is expressible as:
+
 \begin{equation}
 \sum_{p \in \ddot{P}} \operatorname{g}( \vec{x}_p ) \lambda_p + \sum_{r \in R} \operatorname{g}(  \vec{x}_r ) \lambda_r \geq h \quad \left[ \gamma \right]
 \end{equation}
-which requires the following modifications to the pricing problem:
+requiring the following modifications to the pricing problem:
+
 \begin{equation}
 \begin{aligned}
-z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma\transpose g_\vec{x}} - \pi_0 & \\
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma g_\vec{x}} - \pi_0 & \\
 &\st & \mat{D} \vec{x} & \geq \vec{d} \\
 && {\color{blue} g_\vec{x}} & {\color{blue} = \operatorname{g}(\vec{x})} \\
 && \vec{x} & \in \mathbb{Z}_+^n \\
-&& {\color{blue} g_\vec{x}} & {\color{blue} \geq 0}
+&& {\color{blue} g_\vec{x}} & {\color{blue} \in \mathbb{R}}
 \end{aligned}
 \end{equation}
 
-Similar to what we have observed for branching on master variables (Section \ref{sec:cg_bp_bp_branching_master}), the non-trivial task is now to express $g_\vec{x} = \operatorname{g}(\vec{x})$ using a finite set of linear constraints.
-
-// TODO: Reference to Chantal's thesis
+As with branching on master variables (Section \ref{sec:cg_bp_bp_branching_master}), the challenge is expressing $g_\vec{x} = \operatorname{g}(\vec{x})$ using a finite set of linear constraints. In her master thesis, Chantal Reinartz Groba implements such a master separator within the \GCG{} framework \cite{reinartzgroba2024todo}.

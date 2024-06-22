@@ -31,7 +31,7 @@ Let $\polyhedron{P}$ be a convex set. A point $\vec{p} \in \polyhedron{P}$ is an
 \begin{definition}\label{def:rays}
 Let $\polyhedron{P}$ be a convex set. A vector $\vec{r} \in \mathbb{R}_0^n \setminus \{0\}$ is a \textbf{ray} of $\polyhedron{P}$ iff $\forall \vec{x} \in \polyhedron{P}. \forall \beta \in \mathbb{R}_+. \vec{x} + \beta \vec{r} \in \polyhedron{P}$.
 
-The cone of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n$ we denote as:
+The cone of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n$ is denoted as:
 \begin{equation*}
 \raycone(\vec{r}_1, \dots, \vec{r}_k) \coloneqq \left\{ \sum_{i=1}^{k} \alpha_i \vec{r}_i \mid \forall i \in \{1, \dots, k\}. \alpha_i \geq 0 \right\}
 \end{equation*}
@@ -54,7 +54,7 @@ Any hyperplane is a convex set.
 \end{corollary}
 
 \begin{proof}
-Let $\polyhedron{H} = \{\vec{x} \mid \vec{f}\transpose \vec{x} = f\}$ be a hyperplane. Let $k \in \mathbb{N}$, $\vec{x}_1, \dots, \vec{x}_k \in \polyhedron{H}$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k}$:
+Let $\polyhedron{H} = \{\vec{x} \mid \vec{f}\transpose \vec{x} = f\}$ be a hyperplane. Let $k \in \mathbb{N}$, $\vec{x}_1, \dots, \vec{x}_k \in \polyhedron{H}$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k} \alpha_i = 1$:
 \begin{align*}
 \vec{f}\transpose \left( \sum_{i=1}^{k} \alpha_i \vec{x}_i \right)
 &= \sum_{i=1}^{k} \alpha_i \vec{f}\transpose \vec{x}_i \\
@@ -67,7 +67,7 @@ Therefore, the convex combination $\sum_{i=1}^{k} \alpha_i \vec{x}_i$ is in the 
 
 % Halfspace
 \begin{definition}
-A \textbf{halfspace} is the set above or below a hyperplane. A halfspace is open if the points on the hyperplane are excluded, otherwise closed.
+A \textbf{halfspace} is the set either above or below a hyperplane. A halfspace is open if the points on the hyperplane are excluded; otherwise, it is closed.
 \end{definition}
 
 \begin{corollary}\label{cor:halfspace_convex}
@@ -75,7 +75,7 @@ Any halfspace is a convex set.
 \end{corollary}
 
 \begin{proof}
-Let $\polyhedron{H}^+ = \{\vec{x} \mid \vec{f}\transpose \vec{x} > f\}$ be an open halfspace (analogous for $\polyhedron{H}^- = \{\vec{x} \mid \vec{f}\transpose \vec{x} < f\}$, and for the closed halfspaces). Let $k \in \mathbb{N}$, $\vec{x_1}, \dots, \vec{x_k} \in \polyhedron{H}$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k}$:
+Let $\polyhedron{H}^+ = \{\vec{x} \mid \vec{f}\transpose \vec{x} > f\}$ be an open halfspace (analogous for $\polyhedron{H}^- = \{\vec{x} \mid \vec{f}\transpose \vec{x} < f\}$, and for the closed halfspaces). Let $k \in \mathbb{N}$, $\vec{x_1}, \dots, \vec{x_k} \in \polyhedron{H}^+$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k} \alpha_i = 1$:
 \begin{align*}
 \vec{f}\transpose \left( \sum_{i=1}^{k} \alpha_i \vec{x}_i \right)
 &= \sum_{i=1}^{k} \alpha_i \vec{f}\transpose \vec{x}_i \\
@@ -83,17 +83,21 @@ Let $\polyhedron{H}^+ = \{\vec{x} \mid \vec{f}\transpose \vec{x} > f\}$ be an op
 &= f \cdot \sum_{i=1}^{k} \alpha_i \\
 &= f
 \end{align*}
-Therefore, the convex combination $\sum_{i=1}^{k} \alpha_i \vec{x}_i$ is in the halfspace $\polyhedron{H}$.
+Therefore, the convex combination $\sum_{i=1}^{k} \alpha_i \vec{x}_i$ is in the halfspace $\polyhedron{H}^+$.
 \end{proof}
 
 % Polyhedron
 \begin{definition}
-A \textbf{polyhedron} $\polyhedron{P} \subseteq \mathbb{R}^n$ is defined by the intersection of a set of closed halfspaces, i.e. $\polyhedron{P} \coloneqq \{\vec{x} \in \mathbb{R}^n \mid \mat{A} \vec{x} \geq \vec{b}\}$, with $\mat{A} \in \mathbb{R}^{m \times n}, \vec{b} \in \mathbb{R}^m$.
-
-By Corollaries \ref{cor:intersection_convex} and \ref{cor:halfspace_convex}, a polyhedron is also a convex set of points.
+A \textbf{polyhedron} $\polyhedron{P} \subseteq \mathbb{R}^n$ is defined by the intersection of a set of closed halfspaces, i.e., $\polyhedron{P} \coloneqq \{\vec{x} \in \mathbb{R}^n \mid \mat{A} \vec{x} \geq \vec{b}\}$, with $\mat{A} \in \mathbb{R}^{m \times n}, \vec{b} \in \mathbb{R}^m$.
 \end{definition}
 
-% Ray
+\begin{corollary}
+A polyhedron is a convex set.
+\end{corollary}
+
+\begin{proof}
+Follows from Corollaries \ref{cor:intersection_convex} and \ref{cor:halfspace_convex}.
+\end{proof}
 
 % Monkowski-Weyl
 \begin{definition}
@@ -103,7 +107,7 @@ P \oplus Q \coloneqq \left\{\vec{p} + \vec{q} \mid \vec{p} \in P \land \vec{q} \
 \end{equation*}
 \end{definition}
 
-\begin{theorem}[Minkowski-Weyl]\label{th:minkowski-weyl}
+\begin{theorem}[Minkowski-Weyl \cite{chappell2019minkowski}]\label{th:minkowski-weyl}
 For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equivalent:
 \begin{enumerate}
 \item $\polyhedron{P}$ is a polyhedron, i.e., there exists some finite matrix $\mat{A} \in \mathbb{R}^{m \times n}$ and some vector $\vec{b} \in \mathbb{R}^m$ such that $P = \{\vec{x} \in \mathbb{R}^n \mid \mat{A} \vec{x} \leq \vec{b}\}$
@@ -111,7 +115,7 @@ For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equival
 \end{enumerate}
 \end{theorem}
 
-In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e. closed halfspaces, or by its vertices and rays. Most polyhedra can be represented in this way using only their extreme points and extreme rays. Figure \ref{fig:minkowski-weyl} illustrates this theorem on two exemplary polyhedra.
+In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e., closed halfspaces, or by its vertices and rays. Most polyhedra can be represented in this way using only their extreme points and extreme rays. Figure \ref{fig:minkowski-weyl} illustrates this theorem on two exemplary polyhedra.
 
 \begin{figure}
 \centering
@@ -162,14 +166,14 @@ In simple terms, the Minkowski-Weyl theorem states that any polyhedron can alway
 \draw[thick, red, -latex] (A) -- (A-ray-short); % Ray at 45 degrees from point (1,2)
 \draw[thick, red, -latex] (C) -- (C-ray-short); % Ray at 45 degrees from point (2,1)
 \end{tikzpicture}
-\caption{Illustration of the Minkowski-Weyl theorem. The left figure shows a fully encapsulated polyhedron which can be represented only by its extreme points. Unbounded polyhedra, such as the one on the right, require extreme rays, drawn in red, to be described completely.}
+\caption{Illustration of the Minkowski-Weyl theorem. The left figure shows a fully bounded polyhedron represented by its extreme points. Unbounded polyhedra, such as the one on the right, require extreme rays, shown in red, for a complete description.}
 \label{fig:minkowski-weyl}
 \end{figure}
 
 The following theorem builds upon the Minkowski-Weyl theorem to describe a polyhedron, which is represented by its extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$, using hyperplanes. Here, the sets $P, R$ are used to index the extreme points and extreme rays, respectively.
 
-\begin{theorem}[Nemhauser-Wolsey]\label{th:nemhauser-wolsey}
-Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e. $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$.
+\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer}]\label{th:nemhauser-wolsey}
+Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e., $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$.
 An equivalent description of $\polyhedron{P}$ using its extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$ is:
 \begin{equation}
 \polyhedron{P} = \left\{ \vec{x} \in \mathbb{R}^n \middle\vert
@@ -183,12 +187,12 @@ An equivalent description of $\polyhedron{P}$ using its extreme points $\{\vec{x
 \end{equation}
 \end{theorem}
 
-In the Nemhauser-Wolsey theorem, the conditions of the Minkowski-Weyl theorem are clearly encoded: the second and third lines ensure that the convex set of the extreme points are considered in the first line (Definition \ref{def:convex}), the last playing a part in the cone of extreme rays (Definition \ref{def:rays}), and the first line being the Minkowski sum of the convex hull of extreme rays and the cone of extreme rays.
+The conditions of the Minkowski-Weyl theorem are clearly encoded in the Nemhauser-Wolsey theorem: the second and third lines ensure that the convex set of the extreme points is considered in the first line (Definition \ref{def:convex}), the last pertains to the cone of extreme rays (Definition \ref{def:rays}), and the first line represents the Minkowski sum of the convex hull of extreme rays and the cone of extreme rays.
 
-The Nemhauser-Wolsey theorem has also been adapted to integral polyhedra:
+By requiring $\vec{x} \in \mathbb{Z}^n$ in Theorem \ref{th:nemhauser-wolsey}, we can also describe the integral polyhedra using possibly fractional extreme points and rays. Alternatively, the Nemhauser-Wolsey theorem has been adapted to describe integral polyhedra using only integral (interior) points and (integer-scaled) extreme rays, as shown in the following theorem.
 
-\begin{theorem}[Nemhauser-Wolsey]\label{th:nemhauser-wolsey-integer}
-Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e. $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$. Have $\polyhedron{Q} \coloneqq \polyhedron{P} \cap \mathbb{Z}^n \neq \emptyset$ by the integer hull of $\polyhedron{P}$.
+\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer}]\label{th:nemhauser-wolsey-integer}
+Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e., $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$. Have $\polyhedron{Q} \coloneqq \polyhedron{P} \cap \mathbb{Z}^n \neq \emptyset$ be the integer hull of $\polyhedron{P}$.
 
 An equivalent description of $\polyhedron{Q}$ using a finite subset $\{\vec{x}_p\}_{p \in \ddot{P}}$ of its integer points and its (integer-scaled) extreme rays $\{\vec{x}_r\}_{r \in R}$ is:
 \begin{equation}

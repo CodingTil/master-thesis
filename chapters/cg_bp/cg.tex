@@ -1,5 +1,5 @@
 \section{Column Generation}\label{sec:cg_bp_cg}
-Let us consider the following linear program, which we will henceforth call the \textbf{master problem} \MP{}, where $c_\vec{x} \in \mathbb{R}, \vec{a}_\vec{x}, \vec{b} \in \mathbb{R}^m, \forall \vec{x} \in \indexset{X}$:
+Consider the following linear program, referred to as \textbf{master problem} \MP{}, where $c_\vec{x} \in \mathbb{R}, \vec{a}_\vec{x}, \vec{b} \in \mathbb{R}^m, \forall \vec{x} \in \indexset{X}$:
 \begin{equation}
 \begin{aligned}
 z^*_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & & & \\
@@ -7,9 +7,10 @@ z^*_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & 
 && \lambda_\vec{x} & \geq 0 & & \forall \vec{x} \in \indexset{X}
 \end{aligned}
 \end{equation}
-Assume the number of variables is huge, i.e. a lot larger than the number of constraints ($m \ll \abs{\indexset{X}} < \infty$). Because of this, solving \MP{} in a reasonable amount of time, sometimes at all, is infeasible.
 
-We can, however, make use of a crucial property of the primal simplex algorithm: at any given vertex solution, only few variables are in the basis. Most variables are in the non-basis, and therefore have a solution value of $0$. Having a solution value of $0$ is equivalent to not being in the linear program at all. Therefore, the primal simplex algorithm can also function using a manageable subset of variables $\indexset{X}' \subseteq \indexset{X}$, finding a possibly non-optimal, yet still feasible solution for the entire optimization problem \MP{}. We denote this master problem restricted to a subset of variables as the \textbf{restricted master problem} \RMP{}:
+Assume the number of variables is significantly larger than the number of constraints ($m \ll \abs{\indexset{X}} < \infty$). Because of this, solving \MP{} directly in a reasonable time frame, or at all, is often infeasible.
+
+However, we can utilize a crucial property of the primal simplex algorithm: at any given vertex solution, only few variables are in the basis. Most variables are in the non-basis and therefore have a solution value of $0$. Having a solution value of $0$ is equivalent to not being in the linear program at all. Therefore, the primal simplex algorithm can operate using a manageable subset of variables $\indexset{X}' \subseteq \indexset{X}$, finding a feasible, though possibly non-optimal, solution for \MP{}. This master problem restricted to a subset of variables is called the \textbf{restricted master problem} \RMP{}:
 \begin{equation}
 \begin{aligned}
 z^*_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & & & \\
@@ -18,58 +19,58 @@ z^*_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} 
 \end{aligned}
 \end{equation}
 
-Assuming \MP{} is feasible, two important aspects of finding an optimal solution to \MP{} are still missing: first, how do we find a subset $\indexset{X}'$ of the variables, such that \RMP{} stays feasible? Without this property of the set of variables, no solution of \RMP{} can be found, and therefore none can be found for \MP{}, which would contradict the feasibility of \MP{}. Secondly, assuming a solution of \RMP{} was found, possibly even optimal for the \RMP{}, how could we build upon this solution to eventually find an optimal solution for \MP{}?
+Assuming \MP{} is feasible, two important questions arise for finding an optimal solution to \MP{} by solving \RMP{}: first, how do we select a subset $\indexset{X}'$ of variables, such that \RMP{} remains feasible? Without this property, no solution for \RMP{} can be found, which would contradict the feasibility of \MP{}. Secondly, assuming a solution for \RMP{} is found, possibly even optimal for the \RMP{}, how can we extend this solution to eventually find an optimal solution for \MP{}?
 
-In the following we will dive into these two questions in detail (Sections \ref{sec:cg_bp_cg_farkas} and \ref{sec:cg_bp_cg_reduced}), making way for the final column generation algorithm (Section \ref{sec:cg_bp_cg_alg}).
+The following sections address these questions in detail (Sections \ref{sec:cg_bp_cg_farkas} and \ref{sec:cg_bp_cg_reduced}), leading to the complete column generation algorithm (Section \ref{sec:cg_bp_cg_alg}).
 
 \subsection{Farkas Pricing}\label{sec:cg_bp_cg_farkas}
-Let us assume \MP{} is feasible, but our current selection of variables $\indexset{X}' \subset \indexset{X}$ results in the \RMP{} being infeasible. The task is now to find additional variables such that a new set $\indexset{X}''$ with $\indexset{X}' \subset \indexset{X}'' \subseteq \indexset{X}$ makes the \RMP{} feasible. For this, consider Farkas' lemma:
+Assume \MP{} is feasible, but the current selection of variables $\indexset{X}' \subset \indexset{X}$ results in \RMP{} being infeasible. The task is to find additional variables such that a new set $\indexset{X}''$ with $\indexset{X}' \subset \indexset{X}'' \subseteq \indexset{X}$ makes \RMP{} feasible. Consider Farkas' lemma:
 
-\begin{theorem}[Farkas' lemma]\label{th:farkas_lemma}
+\begin{theorem}[Farkas' lemma \cite{matouvsek2007understanding}]\label{th:farkas_lemma}
 Given $\mat{A} \in \mathbb{R}^{m \times n}$ and $\vec{b} \in \mathbb{R}^m$, then exactly one of the following statements holds:
 \begin{enumerate}
 	\item $\exists \vec{x} \in \mathbb{R}_+^n. \, \mat{A} \vec{x} \geq \vec{b}$
-	\item $\exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0$
+	\item $\exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0$
 \end{enumerate}
 \end{theorem}
 
-Given that the \MP{} is feasible, the following must hold for the \MP{} with $\mat{A} = \mat{A}_{\vert \indexset{X}}$:
+Given that \MP{} is feasible, the following must hold for \MP{} with $\mat{A} = \mat{A}_{\vert \indexset{X}}$:
 \begin{equation}
 \begin{aligned}
-& \\neg \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
-\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}_+^n. \, \neg \left( \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right)\\
-\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0
+\neg & \exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
+\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}^m. \, \neg \left( \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right)\\
+\Leftrightarrow & \forall \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0
 \end{aligned}
 \end{equation}
 
-Furthermore, from the infeasibility of \RMP{} we can also derive the following statement:
+Considering the infeasibility of \RMP{} we can further derive the following statement:
 \begin{equation}
 \begin{aligned}
-& \left( \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right) \\
-\Rightarrow & \left( \neg \forall \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}_+^n. \, \vec{\pi}\transpose \mat{A} > \vec{0} \right)
+& \left( \forall \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right) \\
+\Rightarrow & \left( \neg \forall \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} > \vec{0} \right)
 \end{aligned}
 \end{equation}
 
-Therefore, there is some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ is $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}_+^n$. If none existed, \MP{} would not be feasible.
+Therefore, there exists some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ satisfies $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}^m$. If none existed, \MP{} would not be feasible.
 
-This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to the \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
+This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
 \begin{equation}
 \operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
 \end{equation}
 
-We can add all solutions $\vec{x}$ with a solution value of $\operatorname{F}(\vec{\pi}) < 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, adding the corresponding column $\begin{bmatrix}0 \\ \vec{a}_\vec{x} \end{bmatrix}$ to the problem, thus turning any infeasible \RMP{} feasible.
+We can add all solutions $\vec{x}$ with a value of $\operatorname{F}(\vec{\pi}) < 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, adding the corresponding column $\begin{bmatrix}0 \\ \vec{a}_\vec{x} \end{bmatrix}$ to the problem, thus turning any infeasible \RMP{} feasible.
 
 \subsection{Reduced Cost Pricing}\label{sec:cg_bp_cg_reduced}
-Assume the \RMP{} is feasible. Using a solver of our choice, we can now construct a solution that is optimal within the \RMP{}, providing us with the dual values $\vec{\pi}$. One now must verify whether this solution is also optimal for the \MP{}. For this purpose, we can utilize the pricing problem we are already familiar with from the primal simplex algorithm (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
+Assume \RMP{} is feasible. Using an appropriate solver, we can construct a solution that is optimal within \RMP{}, providing us with the dual values $\vec{\pi}$. We now need to verify whether this solution is also optimal for \MP{}. For this, we can use the familiar pricing problem from the primal simplex algorithm (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
 \begin{equation}
 \bar{c}(\vec{\pi}) = \underset{\vec{x} \in \indexset{X}}{\min} \, c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x}
 \end{equation}
 
-Note, that due to the optimality of \RMP{} the reduced costs of all variables $\vec{x} \in \indexset{X}'$ are already non-negative. If now $\bar{c}(\vec{\pi}) \geq 0$, we have also proven optimality of the current solution for the \MP{}. Otherwise, if $\bar{c}(\vec{\pi}) < 0$, then there is some $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ with $\bar{c}(\vec{\pi}) = c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x} < 0$. Similarly to how the primal simplex algorithm would then swap this variable into the basis, during column generation we add the corresponding column $\begin{bmatrix} c_\vec{x} \\ \vec{a}_\vec{x} \end{bmatrix}$ to the \RMP{}. An important property of this process is that the \RMP{} remains feasible.
+Note that due to the optimality of \RMP{}, the reduced costs of all variables $\vec{x} \in \indexset{X}'$ are already non-negative. If $\bar{c}(\vec{\pi}) \geq 0$, we have also proven the optimality of the current solution for \MP{}. Otherwise, if $\bar{c}(\vec{\pi}) < 0$, there exists some $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ with $\bar{c}(\vec{\pi}) = c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x} < 0$. Similar to how the primal simplex algorithm would swap this variable into the basis, during column generation we add the corresponding column $\begin{bmatrix} c_\vec{x} \\ \vec{a}_\vec{x} \end{bmatrix}$ to \RMP{}. This process ensures that \RMP{} remains feasible.
 
 \begin{algorithm}
-\caption{Column generation algorithm}
-\KwIn{\RMP{} with subset $\indexset{X}' \setminus \indexset{X}$, \RCP{}, \FP{}}
+\caption{Column Generation Algorithm}
+\KwIn{\RMP{} with subset $\indexset{X}' \subseteq \indexset{X}$, \RCP{}, \FP{}}
 \KwOut{Optimal Solution $(\vec{\lambda}, z)$ for the \MP{}}
 \While{$\operatorname{IsInfeasible}(\RMP{})$}{
 	$\left(\None, \vec{\pi}\right) \gets \operatorname{Solve}(\RMP{})$\;
@@ -93,8 +94,9 @@ Note, that due to the optimality of \RMP{} the reduced costs of all variables $\
 \end{algorithm}
 
 \subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
-The column generation algorithm can now be viewed as a variation of the primal simplex algorithm: We start to solve our problem, the \MP{}, with a subset of the original variables, initialized as the empty set or by using some selection-heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it is feasible, or until there are no new variables to add, proving infeasibility of \MP{}. As soon as \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for the \MP{}. If it is, we have found the optimal solution to the \MP{}. Otherwise, we add the corresponding column to the \RMP{} and repeat the process.
+
+The column generation algorithm can be viewed as a variation of the primal simplex algorithm. We start by solving the \MP{} with a subset of the original variables, initialized either as an empty set or using some selection heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it becomes feasible or until there are no new variables to add, proving the infeasibility of \MP{}. Once \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for \MP{}. If it is, we have found the optimal solution to \MP{}. Otherwise, we add the corresponding column to \RMP{} and repeat the process.
 
 \begin{note}\label{note:distinct_columns}
-All columns in the \RMP{} are distinct by design. If a subproblem produced a column that was already present in the \RMP{}, its reduced cost would be non-negative, and it would not be added to the \RMP{} in the first place. Therefore, we can assume that all columns in \RMP{}, and thus in $Q(S)$, are distinct.
+	All columns in \RMP{} are distinct by design. If a subproblem produced a column already present in \RMP{}, its reduced cost would be non-negative, and it would not be added to \RMP{}.
 \end{note}
