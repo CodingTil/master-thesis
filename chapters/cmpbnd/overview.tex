@@ -121,8 +121,8 @@ Given that we require a bounded \IP{} to begin with, let us denote the lower and
 y &\geq 1 + \sum_{B_s \in \bar{S}} \bar{y}_s  + \sum_{B_s \in \ubar{S}} \ubar{y}_s - \abs{S} &
 \end{flalign*}
 \begin{flalign*}
-\bar{y}_s &\geq \frac{v_s + 1 - x_{i,s}}{v_s + 1 - \text{lb}_i} &\forall B_s \in \bar{S} \\
-\ubar{y}_s &\geq \frac{x_{i,s} - v_s}{\text{ub}_i - v_s} &\forall B_s \in \ubar{S}
+\bar{y}_s &\geq \frac{(v_s + 1) - x_{i,s}}{(v_s + 1) - \text{lb}_i} &\forall B_s \in \bar{S} \\
+\ubar{y}_s &\geq \frac{x_{i,s} - (v_s - 1)}{\text{ub}_i - (v_s - 1)} &\forall B_s \in \ubar{S}
 \end{flalign*}
 \end{minipage}
 
