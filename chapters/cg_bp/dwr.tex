@@ -1,6 +1,6 @@
 \section{Dantzig-Wolfe Reformulation}\label{sec:cg_bp_dwr}
 
-The column generation algorithm presented in Section \ref{sec:cg_bp_cg} is particularly useful when we can directly formulate our optimization problem using a master and a pricing problem. However, many problems are provided in the general form of a \LP{}. Using the Dantzig-Wolfe reformulation, we can transform such a \LP{} into a master and pricing problem, making it suitable for column generation. This section introduces this technique and demonstrates how it can be applied to solve a \LP{}.
+The column generation algorithm presented in Section \ref{sec:cg_bp_cg} is particularly useful when we can directly formulate our optimization problem using a master and a pricing problem. However, many problems are provided in the general form of a \LP{}. Using the Dantzig-Wolfe reformulation, we can transform such a \LP{} into a master and pricing problem, making it suitable for column generation \cite{thebook}. This section introduces this technique and demonstrates how it can be applied to solve a \LP{}.
 
 \begin{equation}
 \begin{aligned}
@@ -50,9 +50,9 @@ z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_
 \end{aligned}
 \end{equation}
 
-In this formulation, the last constraint corresponds to projecting a solution of the \MP{} using the $\lambda$ variables back into a solution of the original \LP{}. As this constraint is not otherwise involved in the optimization, it is often omitted during the solving stages and only used afterward to reconstruct a solution using the original $\vec{x}$ variables.
+In this formulation, the last constraint corresponds to projecting a solution of the \MP{} using the $\lambda$ variables back into a solution of the original \LP{}. As this constraint is not otherwise involved in the optimization, it is often omitted during the solving stages and only used afterward to reconstruct a solution using the original $\vec{x}$ variables \cite{thebook}.
 
-Since the number of extreme points and extreme rays of $\polyhedron{D}$ might be enormous, solving the \MP{} directly is typically infeasible. Instead, we can generate these columns on the fly using column generation. For this, we need a subproblem that finds (improving) columns for the \MP{}, i.e., extreme points and extreme rays of $\polyhedron{D}$. We can formulate this pricing problem as follows:
+Since the number of extreme points and extreme rays of $\polyhedron{D}$ might be enormous, solving the \MP{} directly is typically infeasible \cite{thebook}. Instead, we can generate these columns on the fly using column generation. For this, we need a subproblem that finds (improving) columns for the \MP{}, i.e., extreme points and extreme rays of $\polyhedron{D}$. We can formulate this pricing problem as follows:
 \begin{equation}
 \begin{aligned}
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & & \\
@@ -68,4 +68,4 @@ We start by solving the \RMP{} using a subset of the extreme points $P' \subset 
 \item If $z^*_\SP{} \geq 0$, there exists no improving column for \RMP{}, and the column generation algorithm terminates.
 \end{itemize}
 
-While theoretically, the grouping of constraints in the original \LP{} formulation for the Dantzig-Wolfe reformulation does not affect the optimal solution, in practice, the choice of grouping can significantly impact the performance of the column generation algorithm. Since many iterations of the column generation algorithm are often required to find an optimal solution, ideally, one wants \SP{} to be efficiently solvable. Numerous efficient algorithms for specific optimization problems exist, and by grouping constraints in a way that \SP{} corresponds to such structures, one can leverage these algorithms to solve \SP{} efficiently. Although there are ways to find such groupings automatically, this topic is beyond the scope of this thesis.
+While theoretically, the grouping of constraints in the original \LP{} formulation for the Dantzig-Wolfe reformulation does not affect the optimal solution, in practice, the choice of grouping can significantly impact the performance of the column generation algorithm. Since many iterations of the column generation algorithm are often required to find an optimal solution, ideally, one wants \SP{} to be efficiently solvable. Numerous efficient algorithms for specific optimization problems exist, and by grouping constraints in a way that \SP{} corresponds to such structures, one can leverage these algorithms to solve \SP{} efficiently \cite{thebook}. Although there are ways to find such groupings automatically, this topic is beyond the scope of this thesis.

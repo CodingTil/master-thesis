@@ -10,7 +10,7 @@ Consider the following linear program in standard form:
 
 The primal simplex algorithm \cite{dantzig1997simplex} finds an optimal solution by moving from one extreme point of the polyhedron to the next, therefore always remaining feasible. A central aspect of this algorithm is the sufficient optimality condition. For a basic solution $\vec{X} = \left[\vec{x}_\indexset{B}, \vec{x}_\indexset{N}\right]$ at a given extreme point to be optimal, the reduced costs $\bar{c}_j \coloneqq c_j - \vec{\pi}\transpose \vec{a}_j$ for $j \in \indexset{N}$ must be non-negative.
 
-This sufficient optimality condition leads to the \textbf{pricing problem}, which either verifies the optimality of the current basic solution or identifies the non-basic variable $x_l$, $l \in \indexset{N}$, with the least reduced cost ($\bar{c}_l < 0$) to be introduced into the basis next, following Dantzig's rule \cite{dantzig1997simplex,ploskas2014pivoting}. Formally, this is expressed:
+This sufficient optimality condition leads to the \textbf{pricing problem}, which either verifies the optimality of the current basic solution or identifies the non-basic variable $x_l$, $l \in \indexset{N}$, with the least reduced cost ($\bar{c}_l < 0$) to be introduced into the basis next, following Dantzig's rule \cite{dantzig1997simplex,ploskas2014pivoting,thebook}. Formally, this is expressed:
 \begin{equation*}
 l \in \underset{j \in \indexset{N}}{\arg\min} \, c_j - \vec{\pi}\transpose \vec{a}_j
 \end{equation*}

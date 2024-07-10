@@ -107,7 +107,7 @@ P \oplus Q \coloneqq \left\{\vec{p} + \vec{q} \mid \vec{p} \in P \land \vec{q} \
 \end{equation*}
 \end{definition}
 
-\begin{theorem}[Minkowski-Weyl \cite{chappell2019minkowski}]\label{th:minkowski-weyl}
+\begin{theorem}[Minkowski-Weyl \cite{chappell2019minkowski,thebook}]\label{th:minkowski-weyl}
 For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equivalent:
 \begin{enumerate}
 \item $\polyhedron{P}$ is a polyhedron, i.e., there exists some finite matrix $\mat{A} \in \mathbb{R}^{m \times n}$ and some vector $\vec{b} \in \mathbb{R}^m$ such that $P = \{\vec{x} \in \mathbb{R}^n \mid \mat{A} \vec{x} \leq \vec{b}\}$
@@ -172,7 +172,7 @@ In simple terms, the Minkowski-Weyl theorem states that any polyhedron can alway
 
 The following theorem builds upon the Minkowski-Weyl theorem to describe a polyhedron, which is represented by its extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$, using hyperplanes. Here, the sets $P, R$ are used to index the extreme points and extreme rays, respectively.
 
-\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer}]\label{th:nemhauser-wolsey}
+\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer,thebook}]\label{th:nemhauser-wolsey}
 Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e., $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$.
 An equivalent description of $\polyhedron{P}$ using its extreme points $\{\vec{x}_p\}_{p \in P}$ and extreme rays $\{\vec{x}_r\}_{r \in R}$ is:
 \begin{equation}
@@ -191,7 +191,7 @@ The conditions of the Minkowski-Weyl theorem are clearly encoded in the Nemhause
 
 By requiring $\vec{x} \in \mathbb{Z}^n$ in Theorem \ref{th:nemhauser-wolsey}, we can also describe the integral polyhedra using possibly fractional extreme points and rays. Alternatively, the Nemhauser-Wolsey theorem has been adapted to describe integral polyhedra using only integral (interior) points and (integer-scaled) extreme rays, as shown in the following theorem.
 
-\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer}]\label{th:nemhauser-wolsey-integer}
+\begin{theorem}[Nemhauser-Wolsey \cite{wolsey2014integer,thebook}]\label{th:nemhauser-wolsey-integer}
 Consider the polyhedron $\polyhedron{P} = \{\vec{x} \in \mathbb{R}^n \mid \mat{Q} \vec{x} \geq \vec{b}\}$ with full row rank matrix $\mat{Q} \in \mathbb{R}^{m \times n}$, i.e., $\rank(\mat{Q}) = m \leq n \land \polyhedron{P} \neq \emptyset$. Have $\polyhedron{Q} \coloneqq \polyhedron{P} \cap \mathbb{Z}^n \neq \emptyset$ be the integer hull of $\polyhedron{P}$.
 
 An equivalent description of $\polyhedron{Q}$ using a finite subset $\{\vec{x}_p\}_{p \in \ddot{P}}$ of its integer points and its (integer-scaled) extreme rays $\{\vec{x}_r\}_{r \in R}$ is:

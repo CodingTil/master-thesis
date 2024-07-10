@@ -42,7 +42,6 @@ z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_
 \end{aligned}
 \end{equation}
 
-
 In contrast to the Dantzig-Wolfe reformulation for linear programs, during convexification the last constraint, which reconstructs an original solution using a solution of the master problem, is crucial during the solving process to ensure the integrality of the original variables and cannot simply be computed after a solution has been found. The master problem has the following pricing subproblem:
 
 \begin{equation}
@@ -57,7 +56,7 @@ These two changes marked in blue are the key differences between the Dantzig-Wol
 
 The beauty of this approach lies in the fact that the subproblem only generates the extreme points and extreme rays of the integer hull of $\{\vec{x} \geq \vec{0} \mid \mat{D} \vec{x} \geq \vec{d}\}$, regardless of how well the constraints $\mat{D} \vec{x} \geq \vec{d}$ approximate this integer hull. Therefore, we implicitly make use of the integer hull of $\polyhedron{D}$ without explicitly defining it.
 
-$\lambda$ solutions to the \MP{} might lead to fractional $\vec{x}$ solutions. In this case, we must branch on those fractional original variables. We will discuss this in more detail in Section \ref{sec:cg_bp_bp_branching_original}.
+$\lambda$ solutions to the \MP{} might lead to fractional $\vec{x}$ solutions. In this case, we must branch on those fractional original variables \cite{thebook}. We will discuss this in more detail in Section \ref{sec:cg_bp_bp_branching_original}.
 
 \subsection{Discretization}\label{sec:cg_bp_ip_discretization}
 In the discretization approach, we use the adaptation of the Nemhauser-Wolsey Theorem to integer polyhedra (Theorem \ref{th:nemhauser-wolsey-integer}) to reformulate the polyhedron $\polyhedron{D}$, yielding the following master problem:
@@ -73,9 +72,7 @@ z^*_\MP{} = &\min & \sum_{p \in \ddot{P}} c_p \lambda_p &+ &\sum_{r \in R} c_r \
 \end{aligned}
 \end{equation}
 
-By design, a solution to the master problem is now guaranteed to be transformable into an integer solution of the original problem. Therefore, the last constraint can be omitted during the solving process. Solving the linear relaxation of the \RMP{} might lead to fractional $\lambda$ variables, which we can then branch on. We will discuss this in more detail in Section \ref{sec:cg_bp_bp_branching_master}.
-
-Keeping in mind that $\ddot{P}$ is a subset of integer points of $\polyhedron{D}$, i.e., it might include interior points, we must find a pricing problem that can generate not only extreme points (and rays) of $\polyhedron{D}$ but also interior points. This, however, is not trivial, since mathematical optimization typically focuses on finding the most optimal solutions, i.e., the extreme points. We can postpone this concern for now and use the same pricing problem as in the convexification approach:
+By design, a solution to the master problem is now guaranteed to be transformable into an integer solution of the original problem. Therefore, the last constraint can be omitted during the solving process. Solving the linear relaxation of the \RMP{} might lead to fractional $\lambda$ variables, which we can then branch on \cite{thebook}. Keeping in mind that $\ddot{P}$ is a subset of integer points of $\polyhedron{D}$, i.e., it might include interior points, we must find a pricing problem that can generate not only extreme points (and rays) of $\polyhedron{D}$ but also interior points. This, however, is not trivial, since mathematical optimization typically focuses on finding the most optimal solutions, i.e., the extreme points. We can postpone this concern for now and use the same pricing problem as in the convexification approach:
 
 \begin{equation}
 \begin{aligned}

@@ -1,5 +1,5 @@
 \section{Several and Identical Subproblems}\label{sec:cg_bp_idsp}
-Many applications are composed of different families of variables and constraints, which can be decomposed into several distinct subproblems. Column generation can be adapted to this scenario, where we have a set $K$ of subproblems $\SP{k}$ generating variables $\vec{x}^k \in \indexset{X}^k$. Our \MP{} is then defined as:
+Many applications are composed of different families of variables and constraints, which can be decomposed into several distinct subproblems. Column generation can be adapted to this scenario, where we have a set $K$ of subproblems $\SP{k}$ generating variables $\vec{x}^k \in \indexset{X}^k$ \cite{thebook}. Our \MP{} is then defined as:
 
 \begin{equation}
 \begin{aligned}
@@ -28,7 +28,7 @@ This idea of having several subproblems generating columns for the master proble
 \end{aligned}
 \end{equation}
 
-In many applications, the coefficient matrix $\mat{D}$ has a block diagonal structure:
+In many applications, the coefficient matrix $\mat{D}$ has a block diagonal structure \cite{thebook}:
 
 \begin{equation}
 \mat{D} = \begin{bmatrix} \mat{D}^1 & & \\ & \ddots & \\ & & \mat{D}^{\abs{K}} \end{bmatrix}
@@ -59,7 +59,7 @@ z^*_\SP{k} = &\min & \left( \vec{c}^{k \intercal} - \vec{\pi}_\vec{b}\transpose 
 \end{aligned}
 \end{equation}
 
-Now, consider the case where all blocks are equal, i.e., $\mat{D}^1 = \ldots = \mat{D}^{\abs{K}} = \mat{D}$ and $\vec{d}^1 = \ldots = \vec{d}^{\abs{K}} = \vec{d}$. In this case, all subproblems $\SP{k}$ are identical, generating new columns from the same set of extreme points and extreme rays. This implies that in \MP{}, different $\lambda_p^k$ ($\lambda_r^k$) variables for different $k$ correspond to the same extreme point $\vec{x}_p$ ($\vec{x}_r$), which is redundant and could slow down the solving process. In a process called \textbf{aggregation}, we can improve upon this by aggregating these variables:
+Now, consider the case where all blocks are equal, i.e., $\mat{D}^1 = \ldots = \mat{D}^{\abs{K}} = \mat{D}$ and $\vec{d}^1 = \ldots = \vec{d}^{\abs{K}} = \vec{d}$. In this case, all subproblems $\SP{k}$ are identical, generating new columns from the same set of extreme points and extreme rays. This implies that in \MP{}, different $\lambda_p^k$ ($\lambda_r^k$) variables for different $k$ correspond to the same extreme point $\vec{x}_p$ ($\vec{x}_r$), which is redundant and could slow down the solving process \cite{thebook}. In a process called \textbf{aggregation}, we can improve upon this by eliminating this redundancy:
 
 \begin{equation}
 \lambda_p \coloneqq \sum_{k \in K} \lambda_p^k, \; \forall p \in P
@@ -97,7 +97,7 @@ z^*_\SP{agg} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \m
 
 The constraints \eqref{eq:cg_bp_idsp_disagg1} to \eqref{eq:cg_bp_idsp_disagg2} disaggregate a solution for the aggregated variables back into the master variables for each subproblem, which are used to compute a solution to the original formulation using the original variables $\vec{x}^k$. For this reason, the constraints from \eqref{eq:cg_bp_idsp_disagg1} onwards may be omitted during the column generation algorithm. This statement also holds for Dantzig-Wolfe reformulated \IP{}s using the convexification approach, where the only difference in \MP{} are the integrality conditions on $\vec{x}^k$ in constraint \eqref{eq:cg_bp_idsp_agg}. In convexification, however, we can only ensure the integrality of the original solution by branching on the integer original variables with fractional value. Therefore, we constantly need to reintroduce the disaggregated master variables to project a solution of \RMP{} to an original solution.
 
-Disaggregation, however, offers a powerful alternative. Its \MP{} for identical subproblems looks as follows:
+Discretization, however, offers a powerful alternative. Its \MP{} for identical subproblems looks as follows:
 
 \begin{subequations}
 \begin{alignat}{11}
@@ -115,6 +115,6 @@ z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p & + & \sum_{r \in R^k} c_r \lam
 \end{alignat}
 \end{subequations}
 
-In Section \ref{sec:cg_bp_ip_discretization}, we have observed that the integrality constraints on the original variables $\vec{x}^k$ are already enforced by ensuring the integrality of the disaggregated master variables $\lambda_p^k$ and $\lambda_r^k$. In the case of identical subproblems, we can go a step further and also remove the integrality constraints on the disaggregated master variables, as those are implied by the integrality of the aggregated variables $\lambda_p$ and $\lambda_r$. Therefore, during the entire solving process, we can omit the constraints \eqref{eq:cg_bp_idsp_disagg3} to \eqref{eq:cg_bp_idsp_agg2} entirely.
+In Section \ref{sec:cg_bp_ip_discretization}, we have observed that the integrality constraints on the original variables $\vec{x}^k$ are already enforced by ensuring the integrality of the disaggregated master variables $\lambda_p^k$ and $\lambda_r^k$. In the case of identical subproblems, we can go a step further and also neglect the integrality constraints on the disaggregated master variables, as those are implied by the integrality of the aggregated variables $\lambda_p$ and $\lambda_r$ \cite{thebook}. Therefore, during the entire solving process, we can omit the constraints \eqref{eq:cg_bp_idsp_disagg3} to \eqref{eq:cg_bp_idsp_agg2} entirely.
 
 On a final note, it is possible to have both identical and differing subproblems in the same \MP{}. In this case, we introduce classes $C$ of identical subproblems, use one column generator per class, and aggregate the variables within each class.
