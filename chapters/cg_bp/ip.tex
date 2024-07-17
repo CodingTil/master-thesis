@@ -66,8 +66,8 @@ In the discretization approach, we use the adaptation of the Nemhauser-Wolsey Th
 z^*_\MP{} = &\min & \sum_{p \in \ddot{P}} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_r & & & \\
 &\st & \sum_{p \in \ddot{P}} \vec{a}_p \lambda_p &+ &\sum_{r \in R} \vec{a}_r \lambda_r & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] \\
 && \sum_{p \in \ddot{P}} \lambda_p & & & = 1 & \left[\pi_0 \right] & \\
-&& \lambda_p & & & \in \{0, 1\} & & \forall p \in \ddot{P} \\
-&& & & \lambda_r & \in \mathbb{Z}_+ & & \forall r \in R \\
+&& \lambda_p & & & {\color{blue} \in \{0, 1\}} & & \forall p \in \ddot{P} \\
+&& & & \lambda_r & {\color{blue} \in \mathbb{Z}_+} & & \forall r \in R \\
 && \sum_{p \in \ddot{P}} \vec{x}_p \lambda_p &+ &\sum_{r \in R} \vec{x}_r \lambda_r & = \vec{x} {\color{blue} \in \mathbb{Z}_+^n} & &
 \end{aligned}
 \end{equation}

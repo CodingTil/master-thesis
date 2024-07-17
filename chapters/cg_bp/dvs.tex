@@ -1,4 +1,54 @@
 \section{Dual Value Stabilization}\label{sec:cg_bp_dvs}
-During column generation, it has been observed that the dual values oscillate erratically, which means it takes more column generation iterations to generate columns that are considered profitable. One can, however, stabilize the dual values, decreasing such oscillations, resulting in a significant performance improvement of the column generation algorithm. This section covers the fundamentals of the hybridization of the dynamic alpha-schedule stabilization with an ascent method, as proposed by Possea et al., for which we will introduce the building blocks step by step. For more detail, we refer to \cite{pessoa2013out,pessoa2018automation}.
+In order to motivate the need for dual value stabilization as well as the method itself, let us take a digression into Lagrangian relaxation. Consider once again the following \IP{}, containing of complicating constraints $\mat{A} \vec{x} \geq \vec{b}$ and simple constraints $\mat{D} \vec{x} \geq \vec{d}$:
 
-// TODO
+\begin{equation*}
+\begin{aligned}
+z^*_\IP{} = &\min & \vec{c}\transpose \vec{x} & & & \\
+&\st & \mat{A} \vec{x} & \geq \vec{b} & \left[\vec{\pi}_\vec{b}\right] & \\
+&& \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] & \\
+&& \vec{x} & \in \mathbb{Z}^n
+\end{aligned}
+\end{equation*}
+
+Recall, that during Dantzig-Wolfe reformulation (Section \ref{sec:cg_bp_dwr}) we have seen that we can decompose this problem by separating the complicating from the simple constraints, yielding the following pricing problem:
+
+\begin{equation*}
+\begin{aligned}
+z^*_\SP{} = -\pi_0 + &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} & & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation*}
+
+A common approach to compute a lower bound on $z^*_\IP{}$ is to perform a \textit{Lagrangian relaxation} of \IP{}. In this Lagrangian relaxation, we penalize the violation $(\vec{b} - \mat{A} \vec{x})$ of the complicating constraints using \textit{Lagrangian multipliers} $\vec{\pi}_\vec{b}$, yielding the following \textit{Lagrangian subproblem} or \textit{Lagrangian function} \cite{thebook}:
+
+\begin{equation*}
+\begin{aligned}
+\LR{\vec{\pi}_\vec{b}} &= & \min \vec{c}\transpose \vec{x} + \vec{\pi}_\vec{b}\transpose \left( \vec{b} - \mat{A}\vec{x} \right) & & \\
+& \st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&&& \vec{x} & \in \mathbb{Z}_+^n \\
+&= & \vec{\pi}_\vec{b} \vec{b} + \min \left( \vec{c} - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} & & \\
+& \st & \mat{D} \vec{x} & \geq \vec{d} & \left[\vec{\pi}_\vec{d}\right] \\
+&&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation*}
+
+Notice, that both the Lagrangian subproblem and pricing problem are equivalent, neglecting a constant offset in their objective functions.
+
+The quality of the lower bound provided by the Lagrangian relaxation depends on the choice of the Lagrangian multipliers ($\forall \vec{\pi}_\vec{b} > \vec{0}. \; \LR(\vec{\pi}_\vec{b}) \leq z^*_\IP{}$ \cite{thebook}). Assume we were interested in finding the greatest lower bound, i.e. finding the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$ that maximize the Lagrangian subproblem. We could solve the following \textit{Lagrangian dual problem}:
+
+\begin{equation*}
+z^*_\LDP{} = \underset{\vec{\pi}_\vec{b} \geq \vec{0}}{\min} \; \LR{\vec{\pi}_\vec{b}}
+\end{equation*}
+
+It has been shown that if $z^*_\IP{}$ is finite, an optimal solution $\vec{\pi}_\vec{b}^*$ to the \LDP{} provides a bound equal to the optimal objective value of the \MP{}, i.e. $z^*_\IP{} = z^*_\MP{} = z^*_\LDP{}$. And for this reason, the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$ are dual optimal for the \MP{}, and vice versa are optimal dual solutions to the \MP{} optimal for the \LDP{} \cite{thebook}. The naturally arising question is whether one can leverage this interplay of primal and dual solutions efficiently. For this, let us consider a simple approach of solving the \LDP{} by approximation.
+
+The Lagrangian function \LR{} is continuous, concave, and subdifferentiable over its finite domain \cite{thebook}. These properties unsurprisingly suggest a hill-climbing approach for finding the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$: start with some initial guess, and iteratively improve it by moving in the direction of the subgradient of the Lagrangian function. This simple approach is known as the \textit{subgradient method}. Subgradients can also be found fairly easily: for a given $\vec{\pi}_\vec{b} > \vec{0}$, an optimal solution $\vec{x}^*$ to $\LR{\vec{\pi}_\vec{b}}$ provides a subgradient $\vec{y} \coloneqq (\vec{b} - \mat{A} \vec{x}^*)$, i.e. the violation of the complicating constraints, for the Lagrangian function at $\vec{\pi}_\vec{b}$ \cite{thebook}. We may now update our current guess of the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$ by moving in the direction of the subgradient $\vec{y}$, i.e. $\vec{\pi}_\vec{b}^* \leftarrow \vec{\pi}_\vec{b}^* + \alpha \vec{y}$, where $\alpha$ is a step size. This process can be repeated until convergence.
+
+Again, since a primal optimal solution of \IP{} also yields a dual optimal solution, any \IP{} solver can be viewed as a dual solver for \LDP{}. In the case of a Dantzig-Wolfe reformulation solved by column generation this becomes particularly interesting, as the pricing problem is equivalent to the Lagrangian subproblem. It can be viewed as a more elaborate update scheme for the Lagrangian multipliers, where we now use multiple solutions to the subproblem to update our guess of the optimal dual values, this time by solving \MP{} \cite{thebook}. And for this reason, we could also use the subgradient method to solve a Dantzig-Wolfe reformulation, solving the \MP{} only to ensure we find a solution satisfying the complicating constraints.
+
+In practice, both approaches, that is the subgradient method and column generation, share a common issue: the updates of the dual values can overshoot the optimal dual values, resulting in oscillation and slow convergence of the dual values \cite{thebook, pessoa2013out,bastubbe2018computational}. This is undesirable, as it takes longer to find a good lower bound on the \IP{}, as it takes longer to find important columns for the \MP{}. To address this issue, lots of effort has been put into more sophisticated update schemes, through which we obtain explicit control of updating the dual values in a column generation setting. Such \textit{dual value stabilization} can be accomplished by smoothing the dual values over the iterations, i.e. at iteration $t$ we determine the smoothed dual values $\widetilde{\vec{\pi}}^t$ by interpolating the current dual values $\vec{\pi}^{t}$ and the previous smoothed dual values $\widetilde{\vec{\pi}}^{t-1}$:
+
+\begin{equation*}
+\widetilde{\vec{\pi}}^t \coloneqq \beta \vec{\pi}^{t} + (1 - \beta) \widetilde{\vec{\pi}}^{t-1}
+\end{equation*}

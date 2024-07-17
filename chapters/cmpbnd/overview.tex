@@ -30,7 +30,7 @@ where $y$ becomes the column entry for the row added to the master, and $y = 1 \
 To find such a $Q'$ that is expressible in \SP{}, Vanderbeck uses bounds on the original variables. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
 
 \begin{equation}
-B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}
+B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}
 \end{equation}
 \begin{equation}
 \bar{B} \coloneqq \left( x_i, \bar{\eta}, v \right), \bar{\eta} \coloneqq \begin{cases} \leq & \text{if } \eta = \geq \\ \geq & \text{if } \eta = \leq \end{cases}
@@ -39,7 +39,7 @@ B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times 
 We define a component bound sequence as follows:
 
 \begin{equation}
-S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, geq\} \times \mathbb{Z}}
+S \coloneqq \left\{ \left( x_{i,1}, \eta_1, v_1 \right), \dots, \left( x_{j,k}, \eta_k, v_k \right) \right\} \in 2^{\{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}}
 \end{equation}
 and restrictions of $S$ to only upper bounds $\bar{S}$ and lower bounds $\ubar{S}$ respectively:
 
@@ -95,8 +95,8 @@ We now must ensure that newly priced columns $x_{q'}$ are assigned a coefficient
 \begin{equation}
 \begin{aligned}
 y = 1 &\Leftrightarrow \sum_{B_s \in \bar{S}} \bar{y}_s + \sum_{B_s \in \ubar{S}} \ubar{y}_s = \abs{S} &\\
-\bar{y}_s = 1 &\Leftrightarrow x_{i,s} \leq v_s & \forall B_s \in \bar{S} \\
-\ubar{y}_s = 1 &\Leftrightarrow x_{i,s} \geq v_s & \forall B_s \in \ubar{S} \\
+\bar{y}_s = 1 &\Leftrightarrow x_s \leq v_s & \forall B_s \in \bar{S} \\
+\ubar{y}_s = 1 &\Leftrightarrow x_s \geq v_s & \forall B_s \in \ubar{S} \\
 y &\in \{0, 1\} & \\
 \bar{y}_s &\in \{0, 1\} & \forall B_s \in \bar{S} \\
 \ubar{y}_s &\in \{0, 1\} & \forall B_s \in \ubar{S}
@@ -121,8 +121,8 @@ Given that we require a bounded \IP{} to begin with, let us denote the lower and
 y &\geq 1 + \sum_{B_s \in \bar{S}} \bar{y}_s  + \sum_{B_s \in \ubar{S}} \ubar{y}_s - \abs{S} &
 \end{flalign*}
 \begin{flalign*}
-\bar{y}_s &\geq \frac{(v_s + 1) - x_{i,s}}{(v_s + 1) - \text{lb}_i} &\forall B_s \in \bar{S} \\
-\ubar{y}_s &\geq \frac{x_{i,s} - (v_s - 1)}{\text{ub}_i - (v_s - 1)} &\forall B_s \in \ubar{S}
+\bar{y}_s &\geq \frac{(v_s + 1) - x_i}{(v_s + 1) - \text{lb}_i} &\forall B_s \in \bar{S} \\
+\ubar{y}_s &\geq \frac{x_i - (v_s - 1)}{\text{ub}_i - (v_s - 1)} &\forall B_s \in \ubar{S}
 \end{flalign*}
 \end{minipage}
 
@@ -136,8 +136,8 @@ y &\geq 1 + \sum_{B_s \in \bar{S}} \bar{y}_s  + \sum_{B_s \in \ubar{S}} \ubar{y}
 \begin{aligned}
 y &\leq \bar{y}_s &\qquad \forall B_s \in \bar{S} \\
 y &\leq \ubar{y}_s &\qquad \forall B_s \in \ubar{S} \\
-\bar{y}_s &\leq \frac{\text{ub}_i - x_{i,s}}{\text{ub}_i - v_s} &\qquad \forall B_s \in \bar{S} \\
-\ubar{y}_s &\leq \frac{x_{i,s} - \text{lb}_i}{v_s - \text{lb}_i} &\qquad \forall B_s \in \ubar{S}
+\bar{y}_s &\leq \frac{\text{ub}_i - x_i}{\text{ub}_i - v_s} &\qquad \forall B_s \in \bar{S} \\
+\ubar{y}_s &\leq \frac{x_i - \text{lb}_i}{v_s - \text{lb}_i} &\qquad \forall B_s \in \ubar{S}
 \end{aligned}
 \end{equation}
 \end{minipage}

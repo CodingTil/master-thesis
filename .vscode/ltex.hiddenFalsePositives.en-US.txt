@@ -1,2 +1,3 @@
 {"rule":"TO_NON_BASE","sentence":"^\\QIn particular, the specific element in the list that such a B&B-tree points to signifies the last column that was in the This idea is conveyed in Figure \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
 {"rule":"TO_NON_BASE","sentence":"^\\QIn particular, the specific element in the list that such a B&B-tree points to signifies the last column that was in the when the node was last active.\\E$"}
+{"rule":"TO_NON_BASE","sentence":"^\\QThe specific element in the list that a search tree node points to indicates the last column in the when the node was last active.\\E$"}

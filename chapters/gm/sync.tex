@@ -1,4 +1,4 @@
-\section{Mastervariable Synchronization across the entire B\&B-Tree}\label{sec:gm_sync}
+\section{Mastervariable Synchronization across the entire Search Tree}\label{sec:gm_sync}
 \begin{figure}[H]
 \centering
 \tikzset{every tree node/.style={minimum width=2em,draw,circle},
@@ -19,22 +19,24 @@
 	]
 ]
 \end{tikzpicture}
-\caption{An exemplary B\&B-tree created by the component bound branching rule, where the lexicographic order of the nodes resembles the order in which they were created.}
+\caption{An exemplary search tree created by the component bound branching rule, where the lexicographic order of the nodes resembles the order in which they were created.}
 \label{fig:gm_sync_tree}
 \end{figure}
 
-Generic mastercuts used as branching decisions need to be aware of all columns currently existing in the \RMP{}. For instance, in component bound branching (Chapter \ref{ch:cmpbnd}), all columns satisfying the branching decision must have a coefficient of $1$ for the mastercut. This can be easily managed when creating the branching decision and when a new column is generated in the subtree of the node where the decision was made. However, consider the following scenario in a branch-and-bound tree generated with the component bound branching rule, as depicted in Figure \ref{fig:gm_sync_tree}: we are currently processing node F in the B\&B-tree and generate a new column $q'$. After deactivating node F and activating node D, it is possible that $x_{q'}$ satisfies the component bounds imposed in D. Thus, $q'$ should have a coefficient of $1$ in the mastercut of D. However, since the column was generated in F, it is not known to D, potentially invalidating the mastercut of D.
+As we have mentioned multiple times, all columns in the \RMP{} must have the correct coefficient set in the master constraint. Just one column with an incorrect coefficient can lead to invalid mastercuts. For example, if a column $q$ satisfies a component bound sequence $S$, it should have a coefficient of $1$ in the mastercut. Any other coefficient would lead to an incomplete branching scheme. This very same reason is why the pricing modifications of a generic mastercut are essential in the first place.
 
-To prevent this, branching decisions must be aware of these columns to update their coefficients accordingly. Specifically, we want to synchronize newly generated master variables across the entire B\&B-tree lazily, i.e., only when a node is activated. Moreover, in \GCG{}, master variables deemed unnecessary can be removed from the master problem, and deleted variables should not require synchronization.
+So, we must ensure that all columns in the \RMP{} have the correct coefficients set. This can be easily achieved when creating the generic mastercut, as well as when a new column is generated in the subtree of the node where the generic mastercut was created. In the former case, we may simply compute the coefficients of all variables in the \RMP{} upfront. And in the later case, the solution value of the coefficient variable in the \SP{} already determines the correct coefficient in the master. However, consider the following scenario in a search tree, for example a tree generated with the component bound branching rule using generic mastercuts, as depicted in Figure \ref{fig:gm_sync_tree}: we are currently processing node F in the search tree and generate a new column $q'$. After deactivating node F and activating node D, it is possible that $x_{q'}$ satisfies the component bounds imposed in D. Thus, $q'$ should have a coefficient of $1$ in the mastercut of D. However, since the column was generated in F, the information that $q'$ was created was not communicated to D. And therefore, the coefficient of $q'$ in the mastercut of D is not set correctly. This problem also occurs for cuts produced by master separators.
 
-In this section, we will first analyze the current approach taken by the implementation of Vanderbeck's generic branching in \GCG{}. Then, we will present a more efficient approach, referred to as \textbf{history tracking}, and further optimize it.
+To prevent this, all generic mastercuts must be made aware of these columns to update their coefficients accordingly. Specifically, we want to synchronize newly generated master variables across the entire search tree lazily, i.e., only when a node is activated and thus the update is required. Moreover, since \GCG{} can remove columns it deems unnecessary from the \MP{}, the synchronization must consider the case where a newly generated column is deleted before it is fully synchronized across the search tree.
+
+In this section, we will first analyze the current approach taken by the implementation of Vanderbeck's generic branching in \GCG{}. Then, we will present a more efficient approach, which we refer to as \textbf{history tracking}, and further optimize it.
 
 \subsection{Current Approach used by the Implementation of Vanderbeck's Generic Branching}\label{subsec:gm_sync_current}
-In the current implementation of Vanderbeck's generic branching in \GCG{}, each node created by this branching rule stores the number of master variables it is aware of. This number is updated whenever a node is deactivated to reflect any newly generated columns. Upon node activation, the current number of variables in the master is compared against how many variables were present the last time the node was active. If new columns have been added to the \RMP{} in the meantime, this counter might increase. If so, the coefficient for the new columns will be determined and set in the \RMP{}.
+In the current implementation of Vanderbeck's generic branching in \GCG{}, each node created by this branching rule stores the number of master variables it is aware of. This number is updated whenever a node is deactivated to reflect any newly generated columns. Upon node activation, the current number of variables in the master is compared against how many variables were present the last time the node was active. If new columns have been added to the \RMP{} in the meantime, this counter might increase. If so, the coefficient for the new columns will be determined and set in the \RMP{}. More specifically, since the number of variables in the master can grow quite large, it avoids updating the coefficients of all columns in the \RMP{}. Instead, it assumes the master variables indexed from the last known number of variables to the current number of variables are new and sets their coefficients accordingly.
 
-Unfortunately, this approach is not complete, as not all new columns are necessarily detected. For instance, if one column was generated and another column was deleted in the meantime, the counter would not increase, as the number of columns in the master would remain the same. Consequently, the coefficient for the new column would not be set in the mastercut, potentially leading to invalid mastercuts.
+Unfortunately, for any generic mastercut in general, this approach is not sufficient, as not all new columns are necessarily detected. For instance, if one column was generated and another column was deleted in the meantime, the counter would not increase, as the number of columns in the master would remain the same. Consequently, the coefficient for the new column would not be set in the mastercut, potentially leading to invalid mastercuts.
 
-Additionally, this approach is not developer-friendly. Developers of branching rules should not have to manage when and where columns are generated and deleted. This should be handled by the framework, requiring developers to only implement an interface method responsible for setting the coefficient of any column, regardless of where it was generated.
+Additionally, this approach is not developer-friendly. Developers of branching rules and master separators should not have to manage when and where columns are generated and deleted. This is a task that should be handled by \GCG{}, abstracting away the origins of the columns.
 
 \subsection{History Tracking Approach}\label{subsec:gm_sync_history}
 \begin{figure}[H]
@@ -71,13 +73,13 @@ Additionally, this approach is not developer-friendly. Developers of branching r
 \draw[->,dashed] (node5.one split south) ++(0,-1) node[below,draw=none] {\texttt{Latest}} -- ++(0,1);
 
 \end{tikzpicture}
-\caption{Reference-counted linked list of the history of columns added to the \RMP{}, with external references drawn dashed from below, e.g., those from the B\&B-tree nodes A, B, and C. Each element holds a reference to the master variable belonging to column $q_i$, as well as the number of references to itself.}
+\caption{Reference-counted linked list of the history of columns added to the \RMP{}, with external references drawn dashed from below, e.g., those from the search tree nodes A, B, and C. Each element holds a reference to the master variable belonging to column $q_i$, as well as the number of references to itself.}
 \label{fig:gm_sync_history}
 \end{figure}
 
-We propose a highly efficient approach to lazily notify all nodes in the B\&B-tree of new columns generated while also considering deleted columns. We introduce a reference-counted linked list of variables added to the \RMP{}, where the order of the variables in the list is determined by their generation order. Each node in the B\&B-tree holds its own external reference to this construct. The specific element in the list that a B\&B-tree node points to signifies the last column in the \RMP{} when the node was last active. All subsequent variables, i.e., the elements next in the list, are new columns generated elsewhere in the list. Additionally, we hold one external reference to the tail of the list, representing the last generated column. This construct is illustrated in Figure \ref{fig:gm_sync_history}. Since the linked list tracks which variables were created when we will refer to this list as the \texttt{varhistory}.
+We propose a highly efficient approach to lazily notify all nodes in the search tree upon node activation of new columns generated while also considering deleted columns. We introduce a reference-counted linked list of variables added to the \RMP{}, where the order of the variables in the list is determined by their generation order. Each node in the search tree holds its own external reference to this construct. The specific element in the list that a search tree node points to indicates the last column in the \RMP{} when the node was last active. All subsequent variables, i.e., the elements next in the list, are new columns generated elsewhere in the tree. Additionally, we hold one external reference to the tail of the list, representing the last generated column. This construct is illustrated in Figure \ref{fig:gm_sync_history}. Since the linked list tracks which variables were created when we will refer to this list as the \texttt{varhistory}.
 
-Let us consider a B\&B-tree with root node A and child nodes B and C. Currently, we are solving node B, and therefore nodes A and B are active. While solving B, we have generated columns $q_3$, $q_4$, and $q_5$. Assume we have solved the relaxation of B to optimality, finding a fractional solution, and have created two child nodes D and E. Both nodes will be created using all columns currently in the \RMP{}, i.e., $q_i, i \in \{0, 5\}$. For this reason, we use the \texttt{Latest} pointer to initialize the reference to the \texttt{varhistory} of D and E (Figure \ref{fig:gm_sync_history_d_e}).
+Let us consider a search tree with root node A and child nodes B and C. Currently, we are solving node B, and therefore nodes A and B are active. While solving B, we have already generated columns $q_3$, $q_4$, and $q_5$. Assume we have solved the relaxation of B to optimality, finding a fractional solution, and have created two child nodes D and E. Both nodes will be created using all columns currently in the \RMP{}, i.e., $q_i, i \in \{0, 5\}$. For this reason, we use the \texttt{Latest} pointer to initialize the reference to the \texttt{varhistory} of D and E (Figure \ref{fig:gm_sync_history_d_e}).
 
 \begin{figure}[H]
 \centering
@@ -119,7 +121,7 @@ Let us consider a B\&B-tree with root node A and child nodes B and C. Currently,
 \label{fig:gm_sync_history_d_e}
 \end{figure}
 
-Continuing this scenario, let \GCG{} deem the column $q_2$ unnecessary and remove it from the \RMP{}. Since there may be external references to this variable, which in this case there are, we do not remove the element in the list holding $q_2$. Instead, we mark it as deleted. Next, we would like to solve node C. For this, we must deactivate node B, and activate node A. Whenever we deactivate a node, we know that it and all its ancestors are already aware of all columns in the \RMP{}. Therefore, we may jump all the active node's pointers to the \texttt{Latest} pointer. This is illustrated in Figure \ref{fig:gm_sync_history_deactivate_B}.
+Continuing this scenario, let \GCG{} deem the column $q_2$ unnecessary and remove it from the \RMP{}. Since there may be external references to this variable, which in this case there are, we do not remove the element in the list holding $q_2$. Instead, we mark it as deleted. Next, we would like to solve node C. For this, we must deactivate node B, and activate node C. Whenever we deactivate a node, we know that it and all its ancestors are already aware of all columns in the \RMP{}. Therefore, we may jump all the active node's pointers to the \texttt{Latest} pointer. This is illustrated in Figure \ref{fig:gm_sync_history_deactivate_B}.
 
 \begin{figure}[H]
 \centering
@@ -161,9 +163,9 @@ Continuing this scenario, let \GCG{} deem the column $q_2$ unnecessary and remov
 \label{fig:gm_sync_history_deactivate_B}
 \end{figure}
 
-Finally, we activate node C. Upon node activation, we realize that the element that C points to in the \texttt{varhistory} has a next element. This means that there are new columns that have been generated since the last time C was active. We forward the pointer of C one by one until reaching the \texttt{Latest} pointer. Each time we forward the pointer, if the variable $q_i$ is not marked as deleted, we pass it to the branching rule to set the coefficient of $q_i$ in the mastercut of C.
+Finally, we can activate node C. Upon node activation, we realize that the element that C points to in the \texttt{varhistory} has a next element. This means that there are new columns that have been generated since the last time C was active. We forward the pointer of C one by one until we reach the \texttt{Latest} pointer. Each time we forward the pointer, if the variable $q_i$ has not been marked as deleted, we calculate the coefficient of $q_i$ in the generic mastercut of C.
 
-Whenever we forward a pointer, either step-by-step or by jumping to the \texttt{Latest} pointer, the internal reference count of the elements in the list is updated. As soon as this reference count reaches zero, the element can be safely freed. This ensures that only necessary variables, those that still need to be synchronized across the entire B\&B-tree, are kept in memory. This is illustrated in Figure \ref{fig:gm_sync_history_activate_C}.
+Whenever we forward a pointer, either step-by-step or by jumping to the \texttt{Latest} pointer, the internal reference count of the elements in the list is updated. As soon as this reference count reaches zero, the element will be safely freed. This ensures that only necessary variables, i.e. those that still need to be synchronized across the entire search tree, are kept in memory. This is illustrated in Figure \ref{fig:gm_sync_history_activate_C}.
 
 \begin{figure}[H]
 \centering
@@ -216,7 +218,7 @@ Assume node C we generates a new column $q_6$. We add this column to the \texttt
 \node (node3) [historynode] {\nodepart{one} $q_3$ \nodepart{two} $1$};
 \node (node4) [historynode,right=of node3] {\nodepart{one} $q_4$ \nodepart{two} $1$};
 \node (node5) [historynode,right=of node4] {\nodepart{one} $q_5$ \nodepart{two} $6$};
-\node (node6) [historynode,right=of node5] {\nodepart{one} $q_6$ \nodepart{two} $1$};
+\node (node6) [historynode,right=of node5] {\nodepart{one} $q_6$ \nodepart{two} $2$};
 
 % Edges
 \draw[->] (node3.two east) -- (node4.one west);
@@ -237,14 +239,14 @@ Assume node C we generates a new column $q_6$. We add this column to the \texttt
 \label{fig:gm_sync_history_generate_q6}
 \end{figure}
 
-This approach is highly efficient as it updates the reference count of elements in the list and passes only new variables to the branching rule. The deletion of variables is not an issue, as we simply do not pass them to the branching rules. Once all external references have seen some variable $q_i$, i.e., its reference count reaches zero, we can automatically free the memory of the element in the list holding $q_i$. This minimizes the memory footprint of the \texttt{varhistory} construct.
+This approach is correct in the sense that all active generic mastercuts are guaranteed to be aware of all columns in the \RMP{}. This correctness is given, since the deletion of variables cannot not cause us to miss any new variables. Since close to no management is required, its performance impact is negligible: we must only update reference counts, forward pointers, and append and free list elements. Furthermore, we hold the memory footprint to a minimum, as the \texttt{varhistory} construct will only hold variables that still need to be synchronized. But once all external references have seen some variable $q_i$, i.e., its reference count reaches zero, we can automatically free the memory of the element in the list holding $q_i$.
 
-And as a final note, this approach is not limited for synchronization of master variables across the B\&B-tree, but can also be used for other purposes, which have symbolized by the \textit{other} reference in the above figures. Such other purposes, for example would be keeping master separators up-to-date (Section \ref{sec:cg_bp_bpc_separators_master}). For more details on this, we refer to the thesis of Chantal Reinartz Groba \cite{reinartzgroba2024todo}.
+And as a final note, this approach is not limited for synchronization of master variables for generic mastercuts used as branching decisions, but can also be used for other purposes, which have symbolized by the \textit{other} reference in the above figures. Such other purposes, for example would be keeping cutting planes generated by master separators up-to-date (Section \ref{sec:cg_bp_bpc_separators_master}). For more details on this, we refer to the thesis of Chantal Reinartz Groba \cite{reinartzgroba2024todo}.
 
 \subsection{History Tracking using Unrolled Linked Lists Approach}\label{subsec:gm_sync_history_unrolled}
-The previous approach has an optimization opportunity: the elements of the \texttt{varhistory} might be allocated in completely different memory locations, leading to poor cache utilization during traversal. Storing the entire list in a contiguous memory block could improve cache locality but could be costly if reallocation and copying are needed when space runs out.
+While already efficient, the previous approach has an opportunity for improvement: the elements of the \texttt{varhistory} might be allocated in completely different memory locations, leading to poor cache utilization during traversal. Storing the entire list in a contiguous memory block could improve cache locality but could be costly if reallocation and copying are needed when space runs out.
 
-We can optimize by unrolling the linked list into blocks storing a fixed number of columns, with each block having its own reference count. These blocks are linked together, forming a list of blocks. The references to the \texttt{varhistory} point to the blocks and hold an offset within the block. This way, each reference still refers to some $q_i$, enabling pointer forwarding one column at a time. A new variable is added to the tail block if space allows; otherwise, a new block is allocated. This concept is illustrated in Figure \ref{fig:gm_sync_history_unrolled}.
+We can improve cache utilization by unrolling the linked list into blocks storing a fixed number of columns, with each block having its own reference count. These blocks are linked together, forming a list of blocks. The references to the \texttt{varhistory} point to the blocks and hold an offset within the block. This way, each reference still refers to some unique column $q_i$, retaining the ability to forward a pointer one column at a time. A new variable is added to the tail block if its capacity isn't maxed out; otherwise, a new block is allocated. This concept is illustrated in Figure \ref{fig:gm_sync_history_unrolled}.
 
 \begin{figure}[H]
 \centering
@@ -263,14 +265,14 @@ We can optimize by unrolling the linked list into blocks storing a fixed number 
 	\nodepart{two} $q_3$
 	\nodepart{three} $q_2$
 	\nodepart{four} $q_3$
-	\nodepart{five} $3$
+	\nodepart{five} $4$
 };
 \node (node1) [historynode,right=of node0] {
 	\nodepart{one} $q_4$
 	\nodepart{two} $q_5$
 	\nodepart{three}
 	\nodepart{four}
-	\nodepart{five} $3$
+	\nodepart{five} $2$
 };
 
 % Edges

@@ -55,9 +55,23 @@ However, \RMP{} might already contain generated columns that violate the branchi
 \end{equation}
 
 \subsection{Branching on the Master Variables}\label{sec:cg_bp_bp_branching_master}
-Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}^*_\RMP{}$ is fractional, i.e., $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, dichotomous branching on a such a single master variable $\lambda_q$ is very weak: Assume our problem consists of a single non-aggregated subproblem, and $\lambda_q^* = 0.5$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is only little better than enumerating all possible solutions \cite{thebook}. Cutting off multiple fractional solutions in each child node would be more desirable.
+Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}^*_\RMP{}$ is fractional, i.e., $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, dichotomous branching on a such a single master variable $\lambda_q$ is very weak: Assume our problem consists of a single non-aggregated subproblem, and $\lambda_q^* = 0.5$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is only little better than enumerating all possible solutions \cite{thebook}. Cutting off multiple fractional solutions in each child node would be more desirable, i.e. we must branch on constraints, in general of the following form:
 
-Alternatively, given a fractional master solution $\vec{\lambda}^*_\RMP{}$, we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds:
+\begin{equation*}
+\sum_{p \in \ddot{P}} \operatorname{f}(p) \lambda_p + \sum_{r \in R} \operatorname{f}(r) \lambda_r \leq f \qquad \left[\gamma\right]
+\end{equation*}
+
+Here, the function $\operatorname{f}$ determines the coefficient of column $p$ or $r$ in the constraint, and $f$ is a constant. The subproblem would have to respect the dual value $\gamma$ of the constraint in the pricing problem:
+
+\begin{equation*}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma \operatorname{f}(\vec{x})} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& \vec{x} & \in \mathbb{Z}_+^n
+\end{aligned}
+\end{equation*}
+
+The question one might ask themselves now is how we can find such a function $\operatorname{f}$ and constant $f$ that are suitable for branching. Henceforth, consider the case where $Q = \ddot{P}$, i.e. our problem is bounded ($R = \emptyset$). In this case, Vanderbeck proposes we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds \cite{vanderbeck1996exact}:
 
 \begin{equation}
 \sum_{q \in Q'} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
@@ -69,7 +83,7 @@ It is obvious that such a subset $Q'$ always exists, for example choose $Q' = \{
 \sum_{q \in Q'} \lambda_q \leq \floor{K} \quad \left[\gamma\right]
 \end{equation}
 
-The corresponding subproblem must be adapted to ensure the validity of the branching decision in the master:
+The corresponding subproblem must be adapted to ensure the validity of the branching decision in the master. In particular, if and only if the pricing problem generates a new column $q'$ for which $q' \in Q'$, the corresponding master variable $\lambda_{q'}$ must be set to 1. This can be achieved by adding the following constraint to the pricing problem:
 
 \begin{equation}\label{eq:cg_bp_branchmaster_pricingmod}
 \begin{aligned}
@@ -81,7 +95,9 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{aligned}
 \end{equation}
 
-The challenge remains to find a routine to determine such a subset $Q'$ in the master solution, for which the set inclusion rule to be added to \SP{} is also \textit{expressible using a finite set of linear constraints}.
+This idea Vanderbeck proposed plays nicely into our more general definition, where we set $\operatorname{f}(q) = \mathbb{1}_{q \in Q'}$ and, in this down branch, $f = \floor{K}$.
+
+What remains is to find a routine to (\textbf{A}) determine such a subset $Q'$ in the master solution, for which the set inclusion rule to be added to \SP{} is also \textit{expressible using a finite set of linear constraints} (\textbf{B}).
 
 \begin{note}
 Adding the variable $y$ to the subproblem allows the column generation algorithm to generate the interior points required for the correctness of the discretization approach, as discussed in Section \ref{sec:cg_bp_ip_discretization} \cite{vanderbeck1996exact}.
@@ -162,7 +178,7 @@ K_j \coloneqq \sum_{q \in Q(S_j)} \lambda_q^*
 Then, to \RMP{} of node $j$, add the following constraint:
 
 \begin{equation}
-\sum_{q \in Q(S_j)} \lambda_q \geq \floor{K_j} \quad \left[\gamma_j\right]
+\sum_{q \in Q(S_j)} \lambda_q \geq \ceil{K_j} \quad \left[\gamma_j\right]
 \end{equation}
 
 Finally, modify the pricing problem as follows:

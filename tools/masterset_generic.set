@@ -1,4 +1,2 @@
 branching/generic/priority = 1
 branching/compbnd/priority = -1
-pricing/masterpricer/stabilization = TRUE
-pricing/masterpricer/stabilizationtree = FALSE

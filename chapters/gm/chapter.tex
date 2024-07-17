@@ -1,27 +1,44 @@
 \chapter{Master Constraints without corresponding Original Problem Constraints}\label{ch:gm}
-In addition to implementing the component bound branching rule (Chapter \ref{ch:cmpbnd}), a significant goal of this thesis is to enable future \GCG{} developers to easily create new branching rules and separators within the framework (Section \ref{sec:tools_gcg}). Currently, \GCG{} has limitations: branching rules must either produce decisions formulated in the original problem, which can then be Dantzig-Wolfe reformulated and added to the master and pricing problems (as seen when branching on original variables in Section \ref{sec:cg_bp_bp_branching_original}), or they must produce constraints for the master problem without requiring modifications to the pricing problem, as seen with Ryan-Foster branching. Other branching rules, such as Vanderbeck's generic branching scheme (Section \ref{sec:cg_bp_bp_branching_generic}), cannot be implemented without significant changes to the \GCG{} framework. These changes would involve applying and removing component bounds in the pricing problem when a B\&B-node is entered or left. Our proposed component bound branching rule (Chapter \ref{ch:cmpbnd}) and any separators using the master problem (Section \ref{sec:cg_bp_bpc_separators_master}) would also require such changes. The reason is that \GCG{} does not currently support imposing constraints in the master problem that necessitate modifications to at least one \SP{}, where the master constraints and induced pricing problem modifications are not a product of a Dantzig-Wolfe reformulation of the original problem and do not necessarily have a counterpart in the original problem.
+In addition to implementing the component bound branching rule (Chapter \ref{ch:cmpbnd}), a significant goal of this thesis is to enable future \GCG{} developers to easily create new branching rules and separators within the framework (Section \ref{sec:tools_gcg}). Currently, \GCG{} has limitations in this regard: branching rules must either produce decisions formulated in the original problem, which can then be Dantzig-Wolfe reformulated and added to the master and pricing problems (as seen when branching on original variables in Section \ref{sec:cg_bp_bp_branching_original}), or they must produce constraints for the master problem without requiring modifications to the pricing problem, as seen with Ryan-Foster branching. Other branching rules, such as Vanderbeck's generic branching scheme (Section \ref{sec:cg_bp_bp_branching_generic}), cannot be implemented without significant changes to the \GCG{} framework. These changes would involve applying and removing component bounds in the pricing problem when a node in the search tree is entered or left. Our proposed component bound branching rule (Chapter \ref{ch:cmpbnd}) and any separators using the master problem (Section \ref{sec:cg_bp_bpc_separators_master}) would also require such changes. The reason is that \GCG{} does not currently support imposing constraints in the master problem that necessitate modifications to at least one \SP{}, where the master constraints and induced pricing problem modifications cannot necessarily be described as a product of a Dantzig-Wolfe reformulation, i.e. do not necessarily have a counterpart in the original formulation.
 
 In this chapter, we will specify the notation of such constraints, referred to as \textbf{generic mastercuts}. We will present our integration of these constraints into the \GCG{} framework as part of a new interface and demonstrate how to apply dual value stabilization to these constraints.
 
 First, let us define the concept of a generic mastercut, which unites Vanderbeck's generic branching scheme, our component bound branching rule, and any master separators.
 
 \begin{definition}
-A \textbf{generic mastercut} is a constraint in the master problem that does not have a counterpart in the original problem, and therefore requires modification to one or multiple \SP{} to ensure its validity in the master. Specifically, it takes the following form:
+A \textbf{generic mastercut} is a constraint in the master problem that does not have a counterpart in the original problem, and therefore requires modification to one or multiple \SP{} to ensure its validity in the master. Specifically, it takes the following form, where the function $\operatorname{f}$ maps columns $p$ and $r$ to their respective coefficients in the master constraint:
 \begin{equation*}
-\sum_{p \in P} f_p \lambda_p + \sum_{r \in R} f_r \lambda_r \leq f' \quad \left[\gamma\right]
+\sum_{p \in P} \operatorname{f}(p) \lambda_p + \sum_{r \in R} \operatorname{f}(r) \lambda_r \leq f \quad \left[\gamma\right]
 \end{equation*}
 
-The subproblems are now responsible for correctly determining the coefficients $f_p$ and $f_r$ of all newly generated columns $p$ and $r$.
+The subproblems are now responsible for correctly determining the coefficients $\operatorname{f}(p)$ and $\operatorname{f}(p)$ of all newly generated columns $p$ and $r$. Therefore, one generic mastercut is associated with a set of pricing modifications, one for each subproblem that the constraint in the master affects.
 \end{definition}
 
-\begin{definition}
+\begin{definition}\label{def:gm_pricing_modification}
 A \textbf{pricing modification} to the subproblem $\SP{k}$ in block $k$, associated with a generic mastercut with dual value $\gamma$, is a set of constraints and variables added to the subproblem to ensure the validity of the generic mastercut in the master problem with respect to new variables.
 
-Every pricing modification includes at least one mandatory variable $y$ with an objective coefficient of $-\gamma$ in the $\SP{k}$. The solution value of $y$ is used as the column entry for the master constraint of the generic mastercut, i.e., $f_p$ or $f_r$. This variable is known as the \textbf{coefficient variable} of the pricing modification. All additional variables will take on auxiliary roles in the pricing problem and have an objective coefficient of zero.
+Every pricing modification includes at least one mandatory variable $y \in Y$ of some domain $Y$ (e.g. $Y = \mathbb{Z}_+$) with an objective coefficient of $-\gamma$ in the $\SP{k}$. The solution value of $y$ is used as the column entry for the master constraint of the generic mastercut, i.e., $\operatorname{f}(p)$ or $\operatorname{f}(r)$. For this reason, variable is known as the \textbf{coefficient variable} of the pricing modification, and we modify the pricing problem as follows:
+
+\begin{equation*}
+\begin{aligned}
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma y} - \pi_0 & \\
+&\st & \mat{D} \vec{x} & \geq \vec{d} \\
+&& {\color{blue} y} & {\color{blue} = \operatorname{f}(\vec{x})} \\
+&& \vec{x} & \in \mathbb{Z}_+^n \\
+&& {\color{blue} y} & {\color{blue} \in Y}
+\end{aligned}
+\end{equation*}
+
+Expressing $y = \operatorname{f}(\vec{x})$ may require auxiliary variables and constraints. Due to their auxiliary role, these variables have an objective coefficient of zero and do not correspond to a row in the master problem.
 \end{definition}
 
-// TODO: which places do we add them?
-// TODO: how can we use them in branching rules?
+This generic mastercut construct can be used by both the \texttt{GENERIC} (Section \ref{sec:cg_bp_bp_branching_generic}) and the \texttt{COMPBND} branching rule (Chapter \ref{ch:cmpbnd}): in both, we choose $\operatorname{f}$ to be an indicator function that equals one if and only if the column in question fully satisfies a given component bound sequence $S$. Thus, $y$ would be a binary decision variable ($Y = \{0, 1\}$).
+
+In Vanderbeck's generic branching scheme, the pricing problems are only permitted to generate columns in the region defined by $S$. We enforce this, by creating auxiliary constraints $x_i \eta_i n_i$ for each $\left( x_{*,i}, \eta_i, n_i \right) \in S$, and forcing $y = 1 (= \operatorname{f}(\vec{x}))$ (or $Y = \{1\}$), though $y$ could be removed altogether through presolving. In contrast, \texttt{COMPBND} branching additionally allows columns violating $S$ to be generated, thus we create auxiliary variables and constraints to determine whether all bounds in $S$ were satisfied, as discussed in Section \ref{sec:cmpbnd_overview}.
+
+The benefit of this construct is its generality, and thus its versatility. It does not presume anything about the origin of a generic mastercut. For this reason, it is not only applicable to branching rules, but, for example, also to separators. In Section \ref{sec:cg_bp_bpc_separators_master}, we have briefly discussed the possibility of separating a fractional master solution by finding cutting planes solely based on information of the Dantzig-Wolfe reformulation. Cuts found by such a master separator would exactly fit the definition of a generic mastercut.
+
+In the following, we will see that a technical issue affecting the validity of the constraints arises when generic mastercuts are applied in non-root nodes. We will briefly present how the current implementation of Vanderbeck's generic branching scheme in \GCG{} deals with this issue, and then introduce our solution that is correct, more efficient, and more broadly applicable. Finally, we will discuss how we can continue using dual value stabilization in \GCG{} with generic mastercuts.
 
 \input{chapters/gm/sync}
 \input{chapters/gm/dvs}
