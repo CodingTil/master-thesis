@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -15,10 +17,7 @@ const inputFilePath = "check/testset/compbnd_large.test"
 const outputFilePath = "check/testset/compbnd_filtered.test"
 const gcgCommand = "./bin/gcg"
 
-const parameters = "set limits time 300" +
-	" set limits nodes 2100000000" +
-	" set lp advanced threads 1" +
-	" set timing clocktype 1"
+const parameters = "set limits time 60"
 
 var totalPaths int32
 var acceptedPaths int32
@@ -49,7 +48,7 @@ func main() {
 	totalPaths = int32(len(paths))
 	var wg sync.WaitGroup
 	results := make(chan string, len(paths))
-	semaphore := make(chan struct{}, 16)
+	semaphore := make(chan struct{}, runtime.NumCPU()-2)
 
 	for i, p := range paths {
 		wg.Add(1)
@@ -107,28 +106,25 @@ func main() {
 	log.Printf("Accepted %d/%d (%.2f%%) paths", acceptedPaths, totalPaths, float64(acceptedPaths)/float64(totalPaths)*100)
 }
 
-func checkPath(p string) bool {
-	cmd := exec.Command(gcgCommand, "-c", parameters+" r check/"+p+" opt disp stat q")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	if err := cmd.Run(); err != nil {
-		log.Printf("Failed to execute command for path %s: %v", p, err)
-		failedPathsMutex.Lock()
-		failedPaths = append(failedPaths, p)
-		failedPathsMutex.Unlock()
-		return false
-	}
-
+func checkSuccessfulRun(p string, out bytes.Buffer) bool {
 	scanner := bufio.NewScanner(&out)
+	lines := make([]string, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
+		lines = append(lines, line)
 		if strings.HasPrefix(line, "  generic") {
 			parts := strings.Fields(line)
 			if len(parts) > 1 {
 				lastNumber := parts[len(parts)-1]
-				if lastNumber != "0" {
+				i, err := strconv.Atoi(lastNumber)
+				if err != nil {
+					panic(err)
+				}
+				if i > 1 {
 					return true
+				} else {
+					log.Printf("Path %s has only %d nodes", p, i)
+					return false
 				}
 			}
 		}
@@ -141,34 +137,46 @@ func checkPath(p string) bool {
 	return false
 }
 
+func buildCommand(p string) *exec.Cmd {
+	split := strings.Split(p, ";")
+	instance := split[0]
+	if len(split) > 1 {
+		decomposition := split[1]
+		return exec.Command(gcgCommand, "-c", parameters+" r check/"+instance+" r check/"+decomposition+" opt checksol disp stat q")
+	} else {
+		return exec.Command(gcgCommand, "-c", parameters+" r check/"+instance+" opt checksol disp stat q")
+	}
+}
+
+func checkPath(p string) bool {
+	cmd := buildCommand(p)
+	log.Printf("Command: %s", cmd.String())
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		log.Printf("Failed to execute command for path %s: %v", p, err)
+		log.Printf("\tFailed command: %s", cmd.String())
+		failedPathsMutex.Lock()
+		failedPaths = append(failedPaths, p)
+		failedPathsMutex.Unlock()
+		return false
+	}
+
+	return checkSuccessfulRun(p, out)
+}
+
 func checkPathSequential(p string) bool {
 	log.Printf("Retrying path: %s", p)
-	cmd := exec.Command(gcgCommand, "-c", parameters+" r check/"+p+" opt disp stat q")
+	cmd := buildCommand(p)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	if err := cmd.Run(); err != nil {
 		log.Printf("Failed again to execute command for path %s: %v", p, err)
+		log.Printf("\tFailed command: %s", cmd.String())
 		return false
 	}
 
-	scanner := bufio.NewScanner(&out)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "  generic") {
-			parts := strings.Fields(line)
-			if len(parts) > 1 {
-				lastNumber := parts[len(parts)-1]
-				if lastNumber != "0" {
-					return true
-				}
-			}
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Printf("Error reading output for path %s: %v", p, err)
-	}
-
-	return false
+	return checkSuccessfulRun(p, out)
 }

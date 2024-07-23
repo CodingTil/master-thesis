@@ -48,27 +48,27 @@ Let us denote the restriction of $Q(S)$ to the columns $q$ with fractional $\lam
 
 
 \subsection{Choice of Component Bounds}\label{sec:cmpbnd_separation_choice}
-The separation procedure described above is not complete yet, as we have not defined which component $x_i$ we impose which bounds on. This choice can significantly impact the performance of the subsequent solving of the child nodes. In the worst case, the separation procedure will yield a component bound sequence $S$ for which $Q(S)$ only contains one column. Maintaining balance within the branch-and-bound tree is generally beneficial, but the time required to find a suitable $S$ can be significant and must be traded off against the time saved by having a balanced tree.
+The separation procedure described above is not complete yet, as we have not defined on which component $x_i$ we impose which bounds. This choice can significantly impact the performance of the subsequent solving of the child nodes. In the worst case, the separation procedure will yield a component bound sequence $S$ for which $Q(S)$ only contains one column. Maintaining balance within the branch-and-bound tree is generally beneficial, but the time required to find an optimal $S$ can grow arbitrarily large and must be traded off against improved performance that comes with a balanced tree. We propose the following two-staged approach:
 
-There are numerous heuristics for selecting a component to separate on, for example, choosing the component that has the most distinct values within all fractional columns of $Q(S^k)$, and countless possibilities for deciding which bound to impose on the selected component $x_i$, such as imposing lower bounds only if $v - x_{i,q_1} < x_{i,q_2} - v$, or choosing the component bound sequence for which $\abs{Q(S)}$ is larger.
+In the first stage, using one or multiple heuristics, we recursively determine a set of valid component bound sequences $S_1, \dots, S_m$ for the current fractional master solution $\vec{\lambda}^*_\RMP{}$. For this, we adapt the previously described separation procedure to explore both options $S_1$ and $S_2$ whenever $F_S$ is integral. A first-stage heuristic is now only responsible for finding a separating component $x_i$ and bound value $v$. Both the lower bound $x_i \leq v$ and the upper bound $x_i \geq v + 1$ will be explored further; we do not have to choose between them at this stage. In particular, we propose two heuristics for the first stage:
 
-We propose choosing the component $x_i$ for which:
-\begin{equation*}
-\begin{aligned}
-max_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\max} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
-min_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\min} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
-x_i &= \underset{j \in \{1, \dots, n\}}{\arg\max} \; max_j - min_j & \\
-v &\coloneqq \frac{max_i - min_i}{2} &
-\end{aligned}
-\end{equation*}
-i.e., $x_i$ is the component with the largest range dispersion within the fractional columns of $Q(S^k)$. With this heuristic, we hope to subdivide the domain of the original variables as evenly as possible, thereby maintaining a balanced branch-and-bound tree.
+\begin{itemize}
+\item	\texttt{MaxMinMidrange} Heuristic: At each iteration $k$, we choose the component $x_i$ for which the components $x_{i,q}$ of the columns $q \in Q_f(S^k)$ are most spread out. We then bound $x_i$ by the midrange of these components. Formally, we define:
+		\begin{equation*}
+		\begin{aligned}
+		max_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\max} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
+		min_j &\coloneqq \underset{q \in Q_f(S^k)}{\arg\min} \; x_{j,q} & \forall j \in \{1, \dots, n\}\\
+		x_i &= \underset{j \in \{1, \dots, n\}}{\arg\max} \; max_j - min_j & \\
+		v &\coloneqq \frac{max_i - min_i}{2} &
+		\end{aligned}
+		\end{equation*}
+\item	\texttt{DistinctMedian} Heuristic: At each iteration $k$, we choose the component $x_i$ for which the components $x_{i,q}$ of the columns $q \in Q_f(S^k)$ have the most distinct values. We then bound $x_i$ by the median of these components.
+\end{itemize}
 
-After we have selected a component $x_i$ to branch on, we propose to proceed with the component bound on $x_i$, i.e., either $\left( x_i, \leq, v \right)$ or $\left( x_i, \geq, v + 1 \right)$, for which the resulting component bound sequence $S$ spans the most columns, i.e. for which $\abs{Q(S)}$ is larger. This heuristic, we hope, will lead to a balanced tree.
-
-Since there are endless combinations of heuristics for selecting a component and a bound, one could alternatively rewrite the separation procedure as a recursive algorithm which returns (a subset of) all possible component bound sequences. From this selection, one could then choose some $S$ to branch on, though even here the choice of $S$ is not unique. One could also prepare a set of promising component bound sequences and then apply the strong branching heuristic to continue with the candidate that gives the best progress \cite{achterberg2005branching}.
+In the second stage, another heuristic now scores each $S_j$, and we continue to branch using the best $S_j$. We propose to continue with the smallest component bound sequence, i.e. $S_j = \arg\min_{S_1, \dots, S_m} \abs{S_j}$. This minimizes the modifications we make to the pricing problem. In the case that multiple component bound sequences share the same minimal size, out of those we then select the one where $K_j \coloneqq \sum_{q \in Q(S_j)} \lambda_q^*$ is closest to $\frac{Z}{2}$, where $Z$ denotes the number of aggregated subproblems in the current block (see Section \ref{sec:cg_bp_idsp} and Section \ref{sec:cmpbnd_separation_branching}). The intuition behind this is once again to maintain balance within the branch-and-bound tree: if $K_j$ was far off from $\frac{Z}{2}$, i.e. either close to $0$ or close to $Z$, $S_j$ would be little better than dichotomous branching, since it would either forbid almost all solutions or almost none.
 
 \subsection{Post-processing of Component Bound Sequences}\label{sec:cmpbnd_separation_postprocessing}
-There is no guarantee that the separation procedure will find a component bound sequence $S$ in which each component $x_i$ has at most one upper bound (lower bound analogous). While this is not a problem from a mathematical standpoint, only the least upper bound is relevant, and so adding variables and constraints for the other upper bounds is unnecessary and could potentially slow down the solving process of \SP{}. Therefore, post-processing of the component bound sequences, i.e., removing redundant bounds, is advisable.
+Depending on the heuristics chosen, there is no guarantee that the separation procedure will find a component bound sequence $S$ in which each component $x_i$ has at most one upper bound (lower bound analogous). While this is not a problem from a mathematical standpoint, only the least upper bound is relevant, and so adding variables and constraints for the other upper bounds is unnecessary and could potentially slow down the solving process of \SP{}. Therefore, post-processing of the component bound sequences, i.e., removing redundant bounds, is advisable. For example, if we had $S = \{x_1 \leq 3, x_1 \leq 4\}$, the first bound already implies the second, and we can remove the second bound from $S$, yielding $\{x_1 \leq 3\}$.
 
 \subsection{Branching with Multiple Subproblems}\label{sec:cmpbnd_separation_branching}
 The component bound branching rule described above can be applied to instances with a single subproblem, as well as instances with multiple identical subproblems aggregated into a single subproblem (see Section \ref{sec:cg_bp_idsp}). However, there are instances consisting of at least two distinct (aggregated) subproblems, also known as blocks, where the master problem yields a solution ${\vec{\lambda}^k}^*_\RMP{}$ for each block $k$. Since each component $x_i$ belongs to a specific block, not all columns $q_1, q_2$ in \RMP{} will have an entry for $x_i$, thus the separation scheme is not directly applicable across multiple blocks.

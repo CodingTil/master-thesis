@@ -5,7 +5,7 @@ In this chapter, we will specify the notation of such constraints, referred to a
 
 First, let us define the concept of a generic mastercut, which unites Vanderbeck's generic branching scheme, our component bound branching rule, and any master separators.
 
-\begin{definition}
+\begin{definition}\label{def:gm}
 A \textbf{generic mastercut} is a constraint in the master problem that does not have a counterpart in the original problem, and therefore requires modification to one or multiple \SP{} to ensure its validity in the master. Specifically, it takes the following form, where the function $\operatorname{f}$ maps columns $p$ and $r$ to their respective coefficients in the master constraint:
 \begin{equation*}
 \sum_{p \in P} \operatorname{f}(p) \lambda_p + \sum_{r \in R} \operatorname{f}(r) \lambda_r \leq f \quad \left[\gamma\right]
@@ -38,7 +38,7 @@ In Vanderbeck's generic branching scheme, the pricing problems are only permitte
 
 The benefit of this construct is its generality, and thus its versatility. It does not presume anything about the origin of a generic mastercut. For this reason, it is not only applicable to branching rules, but, for example, also to separators. In Section \ref{sec:cg_bp_bpc_separators_master}, we have briefly discussed the possibility of separating a fractional master solution by finding cutting planes solely based on information of the Dantzig-Wolfe reformulation. Cuts found by such a master separator would exactly fit the definition of a generic mastercut.
 
-In the following, we will see that a technical issue affecting the validity of the constraints arises when generic mastercuts are applied in non-root nodes. We will briefly present how the current implementation of Vanderbeck's generic branching scheme in \GCG{} deals with this issue, and then introduce our solution that is correct, more efficient, and more broadly applicable. Finally, we will discuss how we can continue using dual value stabilization in \GCG{} with generic mastercuts.
+In the following, we will see that a technical issue affecting the validity of the constraints arises when generic mastercuts are created locally in non-root nodes. We will briefly present how the current implementation of Vanderbeck's generic branching scheme in \GCG{} deals with this issue, and then introduce our solution that is correct, more efficient, and more broadly applicable. Finally, we will discuss how we can continue using dual value stabilization in \GCG{} with generic mastercuts.
 
 \input{chapters/gm/sync}
 \input{chapters/gm/dvs}
