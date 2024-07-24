@@ -17,3 +17,8 @@ subgradient
 Subgradients
 presolving
 subgradients
+mastervariable
+Mastervariable
+mastervariables
+Dantzig
+undominated

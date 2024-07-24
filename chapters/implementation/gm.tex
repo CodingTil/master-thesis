@@ -1,1 +1,47 @@
 \section{Generic Mastercuts}\label{sec:implementation_gm}
+In this thesis we have extended the architecture of \GCG{} to automatically manage generic mastercuts (Chapter \ref{ch:gm}) that developers of branching rules or master separators might want to add to the solver. For this, we have created an interface for interacting with such mastercuts. In particular, we define a generic mastercut as a wrapper around a constraint in the master, as well as variables and constraints to be added to a specific pricing problem:
+
+\begin{lstlisting}[language=C, caption=Generic Mastercut Data Structure]
+struct GCG_PRICINGMODIFICATION {
+	int                   blocknr;
+	SCIP_VAR*             coefvar;
+	SCIP_VAR**            additionalvars;
+	int                   nadditionalvars;
+	SCIP_CONS**           additionalconss;
+	int                   nadditionalconss;
+};
+
+enum GCG_MASTERCUTTYPE {
+	GCG_MASTERCUTTYPE_CONS,
+	GCG_MASTERCUTTYPE_ROW
+};
+
+union GCG_MASTERCUTCUT {
+	SCIP_CONS*           cons;
+	SCIP_ROW*            row;
+};
+
+#define GCG_DECL_MASTERCUTGETCOEFF(x) SCIP_RETCODE x (SCIP* scip, GCG_MASTERCUTDATA* mastercutdata, SCIP_VAR** solvars, SCIP_Real* solvals, int nsolvars, int probnr, SCIP_Real* coef)
+
+struct GCG_MASTERCUTDATA {
+	GCG_MASTERCUTTYPE     type;
+	GCG_MASTERCUTCUT      cut;
+	GCG_PRICINGMODIFICATION* pricingmodifications;
+	int                   npricingmodifications;
+	void*                 data;
+	GCG_DECL_MASTERCUTGETCOEFF ((*mastercutGetCoeff));
+};
+\end{lstlisting}
+
+This setup closely aligns with our definition of a generic mastercut, namely that one such master constraint is associated with at least one pricing modification, and that each pricing modification adds variables and constraints to the subproblem $\SP{k}$ associated with block $k$. Two more considerations were made here:
+
+First, we allow the mastercut to be either a constraint or a row in the master. In \SCIP{}, separators create cutting planes as rows that can be dynamically added and removed from the problem. Constraints, on the other hand, are handled different are ordinarily considered part of the formulation at a specific node. As it is our goal that also master separators use this interface, we permit both types of cuts in the master.
+
+Second, deep within \GCG{}'s pricing loop are the row coefficients for the master variables often recalculated. We could, of course, calculate the mastercut coefficient of a master variable by resolving the pricing problem while fixing all original pricing variables $\vec{x}$ to find the solution value of the coefficient variable $y$. This, however, would impose a significant computational overhead. Instead, to each generic mastercut we pass along a callback function that calculates the coefficient of a master variable in the mastercut given the pricing solution $\vec{x}^*$. As this function might require external data, we allow the user to store a pointer to such data in the \texttt{void* data} field. As an example, take the \texttt{COMPBND} branching rule (Chapter \ref{ch:cmpbnd}): here, the function stored in \texttt{mastercutGetCoeff} would return $1.0$ if the column satisfies the component bound sequence $S$ pointed to by \texttt{data}, and $0.0$ otherwise.
+
+To the outside, we expose methods for creating and freeing a generic mastercut. Within \GCG{} we have adapted the stabilization to handle generic mastercuts according to Section \ref{sec:gm_dvs}. Yet, most notably, we have modified the pricing loop. Here, the pricing modifications of each generic mastercut are applied and removed before and after the pricing problem is solved.
+
+The only part which remaining is to make \GCG{} aware that such generic mastercuts have been added to the problem. In particular, it would be incorrect to apply the modifications of all generated mastercuts to the pricing problem. For instance, a generic mastercut used as a branching constraint in the left subtree is not necessarily valid in the right subtree. And even if a generic mastercut was valid, it might not be actually active in the model, if \SCIP{} believed the cutting plane to be unnecessary. Thus, we require a method to determine the set of currently active generic mastercuts.
+
+In her thesis, Reinartz Groba \cite{reinartzgroba2024todo} presents how \GCG{} retrieves all active generic master cutting planes. As for generic mastercuts used for branching, we can extend the current branching interface of \GCG{} by a callback which simply returns the generic mastercut of the current node, if any. By now simply traversing the tree from the root to the current node, we can collect all active generic mastercuts.
+

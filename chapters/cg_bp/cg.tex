@@ -1,5 +1,6 @@
 \section{Column Generation}\label{sec:cg_bp_cg}
 Consider the following linear program, referred to as \textbf{master problem} \MP{}, where $c_\vec{x} \in \mathbb{R}, \vec{a}_\vec{x}, \vec{b} \in \mathbb{R}^m, \forall \vec{x} \in \indexset{X}$:
+
 \begin{equation}
 \begin{aligned}
 z^*_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & & & \\
@@ -11,6 +12,7 @@ z^*_\MP{} = &\min & \sum_{\vec{x} \in \indexset{X}} c_\vec{x} \lambda_\vec{x} & 
 Assume the number of variables is significantly larger than the number of constraints ($m \ll \abs{\indexset{X}} < \infty$). Because of this, solving \MP{} directly in a reasonable time frame, or at all, is often infeasible \cite{thebook}.
 
 However, we can utilize a crucial property of the primal simplex algorithm: at any given vertex solution, only few variables are in the basis. Most variables are in the non-basis and therefore have a solution value of $0$. Having a solution value of $0$ is equivalent to not being in the linear program at all. Therefore, the primal simplex algorithm can operate using a manageable subset of variables $\indexset{X}' \subseteq \indexset{X}$, finding a feasible, though possibly non-optimal, solution for \MP{}. This master problem restricted to a subset of variables is called the \textbf{restricted master problem} \RMP{}:
+
 \begin{equation}
 \begin{aligned}
 z^*_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} & & & \\
@@ -35,6 +37,7 @@ Given $\mat{A} \in \mathbb{R}^{m \times n}$ and $\vec{b} \in \mathbb{R}^m$, then
 \end{theorem}
 
 Given that \MP{} is feasible, the following must hold for \MP{} with $\mat{A} = \mat{A}_{\vert \indexset{X}}$:
+
 \begin{equation}
 \begin{aligned}
 \neg & \exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \\
@@ -44,6 +47,7 @@ Given that \MP{} is feasible, the following must hold for \MP{} with $\mat{A} = 
 \end{equation}
 
 Considering the infeasibility of \RMP{} we can further derive the following statement:
+
 \begin{equation}
 \begin{aligned}
 & \left( \forall \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A} > \vec{0} \lor \vec{\pi}\transpose \vec{b} \leq 0 \right) \land \left( \exists \vec{\pi} \in \mathbb{R}^m. \, \vec{\pi}\transpose \mat{A}_{\vert \indexset{X}'} \leq \vec{0} \land \vec{\pi}\transpose \vec{b} > 0 \right) \\
@@ -54,6 +58,7 @@ Considering the infeasibility of \RMP{} we can further derive the following stat
 Therefore, there exists some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ satisfies $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}^m$. If none existed, \MP{} would not be feasible.
 
 This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
+
 \begin{equation}
 \operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
 \end{equation}
@@ -62,6 +67,7 @@ We can add all solutions $\vec{x}$ with a value of $\operatorname{F}(\vec{\pi}) 
 
 \subsection{Reduced Cost Pricing \RCP{}}\label{sec:cg_bp_cg_reduced}
 Assume \RMP{} is feasible. Using an appropriate solver, we can construct a solution that is optimal within \RMP{}, providing us with the dual values $\vec{\pi}$. We now need to verify whether this solution is also optimal for \MP{}. For this, we can use the familiar pricing problem from the primal simplex algorithm (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
+
 \begin{equation}
 \bar{c}(\vec{\pi}) = \underset{\vec{x} \in \indexset{X}}{\min} \, c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x}
 \end{equation}
@@ -94,7 +100,6 @@ If $\bar{c}(\vec{\pi}) \geq 0$, no cost-improving column exists and we have prov
 \end{algorithm}
 
 \subsection{Column Generation Algorithm}\label{sec:cg_bp_cg_alg}
-
 The column generation algorithm can be viewed as a variation of the primal simplex algorithm. We start by solving the \MP{} with a subset of the original variables, initialized either as an empty set or using some selection heuristics. If this restricted master problem \RMP{} is infeasible, we use Farkas pricing to find new variables to add to \RMP{}, either until it becomes feasible or until there are no new variables to add, proving the infeasibility of \MP{}. Once \RMP{} is feasible, we solve it to optimality, using reduced cost pricing to verify whether the solution is also optimal for \MP{}. If it is, we have found the optimal solution to \MP{}. Otherwise, we add the corresponding column to \RMP{} and repeat the process \cite{thebook}.
 
 \begin{note}\label{note:distinct_columns}

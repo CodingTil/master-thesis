@@ -39,6 +39,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 
 \subsubsection{Branching in the Pricing Problem}
 Alternatively, we may add the branching decision directly to the pricing problem:
+
 \begin{equation}
 \begin{aligned}
 z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} - \pi_0 & \\
@@ -55,7 +56,7 @@ However, \RMP{} might already contain generated columns that violate the branchi
 \end{equation}
 
 \subsection{Branching on the Master Variables}\label{sec:cg_bp_bp_branching_master}
-Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}^*_\RMP{}$ is fractional, i.e., $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, dichotomous branching on a such a single master variable $\lambda_q$ is very weak: Assume our problem consists of a single non-aggregated subproblem, and $\lambda_q^* = 0.5$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is only little better than enumerating all possible solutions \cite{thebook}. Cutting off multiple fractional solutions in each child node would be more desirable, i.e. we must branch on constraints, in general of the following form:
+Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}^*_\RMP{}$ is fractional, i.e., $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, dichotomous branching on a such a single master variable $\lambda_q$ is very weak: Assume our problem consists of a single non-aggregated subproblem, and $\lambda_q^* = 0.5$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is only little better than enumerating all possible solutions \cite{thebook}. Cutting off multiple fractional solutions in each child node would be more desirable, i.e., we must branch on constraints, in general of the following form:
 
 \begin{equation*}
 \sum_{p \in \ddot{P}} \operatorname{f}(p) \lambda_p + \sum_{r \in R} \operatorname{f}(r) \lambda_r \leq f \qquad \left[\gamma\right]
@@ -71,7 +72,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{aligned}
 \end{equation*}
 
-The question one might ask themselves now is how we can find such a function $\operatorname{f}$ and constant $f$ that are suitable for branching. Henceforth, consider the case where $Q = \ddot{P}$, i.e. our problem is bounded ($R = \emptyset$). In this case, Vanderbeck proposes we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds \cite{vanderbeck1996exact}:
+The question one might ask themselves now is how we can find such a function $\operatorname{f}$ and constant $f$ that are suitable for branching. Henceforth, consider the case where $Q = \ddot{P}$, i.e., our problem is bounded ($R = \emptyset$). In this case, Vanderbeck proposes we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds \cite{vanderbeck1996exact}:
 
 \begin{equation}
 \sum_{q \in Q'} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
@@ -95,9 +96,9 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{aligned}
 \end{equation}
 
-This idea Vanderbeck proposed plays nicely into our more general definition, where we set $\operatorname{f}(q) = \mathbb{1}_{q \in Q'}$ and, in this down branch, $f = \floor{K}$.
+This idea Vanderbeck proposed plays nicely into our more general definition, where we set $\operatorname{f}(q) = \mathbbm{1}_{q \in Q'}$ and, in this down branch, $f = \floor{K}$.
 
-What remains is to find a routine to (\textbf{A}) determine such a subset $Q'$ in the master solution, for which the set inclusion rule to be added to \SP{} is also \textit{expressible using a finite set of linear constraints} (\textbf{B}).
+What remains is to find a routine to determine such a subset $Q'$ in the master solution, for which the set inclusion rule to be added to \SP{} is also \textit{expressible using a finite set of linear constraints}.
 
 \begin{note}
 Adding the variable $y$ to the subproblem allows the column generation algorithm to generate the interior points required for the correctness of the discretization approach, as discussed in Section \ref{sec:cg_bp_ip_discretization} \cite{vanderbeck1996exact}.
@@ -209,31 +210,6 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{equation}
 \end{note}
 
-The procedure for finding a component bound sequence $S$ as described in Proof \ref{pr:cg_bp_bp} leads to dichotomous branching. As discussed earlier, branching on a single master variable leads to an unbalanced tree. To overcome this, Vanderbeck proposes a routine that divides the solution space into multiple branches more evenly. We initialize the component bound sequence as $S = \emptyset$ in the root node, and otherwise set it equal to the component bound sequence of the parent node. Then, we iteratively add component bounds to $S$ as follows:
+The procedure for finding a component bound sequence $S$ as described in Proof \ref{pr:cg_bp_bp} leads to dichotomous branching. As discussed earlier, branching on a single master variable leads to an unbalanced tree. To overcome this, Vanderbeck proposes a sophisticated routine that divides the solution space into multiple branches more evenly \cite{vanderbeck2011branching}.
 
-\begin{algorithm}
-\caption{Vanderbeck's Generic Branching Separation Routine}
-\KwIn{parentnode}
-\KwOut{S}
-\uIf{parentnode = null}{
-	$S \leftarrow \emptyset$\;
-}
-\Else{
-	$S \leftarrow$ parentnode.S\;
-}
-\Loop{
-	$\vec{\alpha} \leftarrow \sum_{q \in Q(S)} \vec{x}_{q} \lambda_q^*$\;
-	\If{$\forall 1 \leq i \leq n. \alpha_i \in \mathbb{Z}$}{
-		\Return{S}\;
-	}
-	$i \leftarrow \operatorname{any}(i \mid \alpha_i \not\in \mathbb{Z})$\;
-	\uIf{$\operatorname{Choose}(i)$}{
-		$S \leftarrow S \cup \left\{ \left( x_i, \leq, \floor{x_i^*} \right) \right\}$\;
-	}
-	\Else{
-		$S \leftarrow S \cup \left\{ \left( x_i, \geq, \floor{x_i^*} + 1 \right) \right\}$\;
-	}
-}
-\end{algorithm}
-
-This presentation of Vanderbeck's generic branching scheme covers the main ideas and concepts. For a more in-depth derivation of this rule, detailed descriptions of the routines, and further optimizations such as node pruning, refer to \cite{vanderbeck1996exact, vanderbeck2010reformulation, vanderbeck2011branching, schmickerath2012experiments}.
+This presentation of Vanderbeck's generic branching scheme just covers the main ideas and concepts. For a more in-depth derivation of this rule, detailed descriptions of the routines, and further optimizations such as node pruning, we refer to \cite{vanderbeck1996exact, vanderbeck2010reformulation, vanderbeck2011branching, schmickerath2012experiments}.

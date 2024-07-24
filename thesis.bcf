@@ -2402,33 +2402,35 @@
     <bcf:citekey order="29" intorder="1">vanderbeck1996exact</bcf:citekey>
     <bcf:citekey order="30" intorder="1">vanderbeck2010reformulation</bcf:citekey>
     <bcf:citekey order="30" intorder="2">vanderbeck1996exact</bcf:citekey>
-    <bcf:citekey order="31" intorder="1">vanderbeck1996exact</bcf:citekey>
-    <bcf:citekey order="31" intorder="2">vanderbeck2010reformulation</bcf:citekey>
-    <bcf:citekey order="31" intorder="3">vanderbeck2011branching</bcf:citekey>
-    <bcf:citekey order="31" intorder="4">schmickerath2012experiments</bcf:citekey>
-    <bcf:citekey order="32" intorder="1">thebook</bcf:citekey>
-    <bcf:citekey order="32" intorder="2">gamrath2010generic</bcf:citekey>
-    <bcf:citekey order="32" intorder="3">witt2013separation</bcf:citekey>
+    <bcf:citekey order="31" intorder="1">vanderbeck2011branching</bcf:citekey>
+    <bcf:citekey order="32" intorder="1">vanderbeck1996exact</bcf:citekey>
+    <bcf:citekey order="32" intorder="2">vanderbeck2010reformulation</bcf:citekey>
+    <bcf:citekey order="32" intorder="3">vanderbeck2011branching</bcf:citekey>
+    <bcf:citekey order="32" intorder="4">schmickerath2012experiments</bcf:citekey>
     <bcf:citekey order="33" intorder="1">thebook</bcf:citekey>
-    <bcf:citekey order="33" intorder="2">bastubbe2018computational</bcf:citekey>
-    <bcf:citekey order="34" intorder="1">reinartzgroba2024todo</bcf:citekey>
-    <bcf:citekey order="35" intorder="1">thebook</bcf:citekey>
+    <bcf:citekey order="33" intorder="2">gamrath2010generic</bcf:citekey>
+    <bcf:citekey order="33" intorder="3">witt2013separation</bcf:citekey>
+    <bcf:citekey order="34" intorder="1">thebook</bcf:citekey>
+    <bcf:citekey order="34" intorder="2">bastubbe2018computational</bcf:citekey>
+    <bcf:citekey order="35" intorder="1">reinartzgroba2024todo</bcf:citekey>
     <bcf:citekey order="36" intorder="1">thebook</bcf:citekey>
     <bcf:citekey order="37" intorder="1">thebook</bcf:citekey>
     <bcf:citekey order="38" intorder="1">thebook</bcf:citekey>
     <bcf:citekey order="39" intorder="1">thebook</bcf:citekey>
     <bcf:citekey order="40" intorder="1">thebook</bcf:citekey>
     <bcf:citekey order="41" intorder="1">thebook</bcf:citekey>
-    <bcf:citekey order="41" intorder="2">pessoa2013out</bcf:citekey>
-    <bcf:citekey order="41" intorder="3">bastubbe2018computational</bcf:citekey>
-    <bcf:citekey order="42" intorder="1">pessoa2013out</bcf:citekey>
-    <bcf:citekey order="42" intorder="2">pessoa2018automation</bcf:citekey>
+    <bcf:citekey order="42" intorder="1">thebook</bcf:citekey>
+    <bcf:citekey order="42" intorder="2">pessoa2013out</bcf:citekey>
+    <bcf:citekey order="42" intorder="3">bastubbe2018computational</bcf:citekey>
     <bcf:citekey order="43" intorder="1">pessoa2013out</bcf:citekey>
     <bcf:citekey order="43" intorder="2">pessoa2018automation</bcf:citekey>
     <bcf:citekey order="44" intorder="1">pessoa2013out</bcf:citekey>
     <bcf:citekey order="44" intorder="2">pessoa2018automation</bcf:citekey>
-    <bcf:citekey order="45" intorder="1">thebook</bcf:citekey>
-    <bcf:citekey order="46" intorder="1">reinartzgroba2024todo</bcf:citekey>
+    <bcf:citekey order="45" intorder="1">pessoa2013out</bcf:citekey>
+    <bcf:citekey order="45" intorder="2">pessoa2018automation</bcf:citekey>
+    <bcf:citekey order="46" intorder="1">thebook</bcf:citekey>
+    <bcf:citekey order="47" intorder="1">reinartzgroba2024todo</bcf:citekey>
+    <bcf:citekey order="48" intorder="1">reinartzgroba2024todo</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

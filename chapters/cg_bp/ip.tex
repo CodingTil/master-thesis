@@ -2,6 +2,7 @@
 Dantzig-Wolfe reformulation can also be applied to integer programs. In this section, we will show how to reformulate an integer program into a master and pricing problem, specifically focusing on the integrality conditions. Later, in Section \ref{sec:cg_bp_bp}, we will explore how to solve such an integer program using column generation.
 
 Consider the following integer program:
+
 \begin{equation}
 \begin{aligned}
 z^*_\IP{} = &\min & \vec{c}\transpose \vec{x} & & & \\
@@ -12,13 +13,16 @@ z^*_\IP{} = &\min & \vec{c}\transpose \vec{x} & & & \\
 \end{equation}
 
 Again, we group the constraints into two sets:
+
 \begin{equation}
 \begin{aligned}
 \polyhedron{A} &\coloneqq \left\{ \vec{x} {\color{blue} \in \mathbb{Z}^n} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
 \polyhedron{D} &\coloneqq \left\{ \vec{x} {\color{blue} \in \mathbb{Z}^n} \mid \mat{D} \vec{x} \geq \vec{d} \right\} &\neq \emptyset
 \end{aligned}
 \end{equation}
+
 Note that $\polyhedron{A}$ and $\polyhedron{D}$ are now the integer hulls of the original polyhedra. For simplicity, let us denote the convex hulls defined by both groups of constraints as:
+
 \begin{equation}
 \begin{aligned}
 \polyhedron{A}' &\coloneqq \left\{ \vec{x} \geq \vec{0} \mid \mat{A} \vec{x} \geq \vec{b} \right\} &\neq \emptyset \\
