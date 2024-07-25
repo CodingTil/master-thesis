@@ -1,2 +1,6 @@
 \section{Component Bound Branching}\label{sec:cmpbnd}
-We have implemented the component bound branching rule as described in Chapter \ref{ch:cmpbnd} in \GCG{}. To enforce its branching decisions, which involve adding constraints and variables to the subproblem, we have used the new generic mastercut interface. Besides this, there is nothing noteworthy to add to the implementation of the branching rule itself. The branching rule is now fully integrated into the \GCG{} framework and can be used as any other branching rule.
+We have implemented the component bound branching rule as detailed in Chapter \ref{ch:cmpbnd} within \GCG{}. This rule necessitates the addition of constraints and variables to the subproblem to enforce its branching decisions, which we have facilitated using the new generic mastercut interface.
+
+The integration of the component bound branching rule into the \GCG{} framework was straightforward due to the generic mastercut interface. This interface allows us to efficiently manage the necessary modifications to the subproblem, ensuring that the branching decisions are correctly enforced.
+
+The component bound branching rule is now fully integrated into the \GCG{} framework, and can be used seamlessly alongside other branching rules.

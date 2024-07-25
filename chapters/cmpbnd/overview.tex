@@ -27,7 +27,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{equation}
 where $y$ becomes the column entry for the row added to the master, and $y = 1 \Leftrightarrow \vec{x} \in Q'$ is expressible using a finite set of linear constraints.
 
-To find such a $Q'$ that is expressible in \SP{}, Vanderbeck uses bounds on the original variables. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
+To find such a $Q'$ that is expressible in \SP{}, Vanderbeck proposes to use bounds on the original variables. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
 
 \begin{equation}
 B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}
@@ -91,7 +91,8 @@ Proof \ref{pr:cg_bp_bp} shows that such an $S$ always exists if the master solut
 \end{minipage}
 \end{multicols}
 
-We now must ensure that newly priced columns $x_{q'}$ are assigned a coefficient of $y = 1$ for the branching decision if $q' \in Q(S)$, i.e., if $\forall (x_i, \eta, v) \in S. \eta(x_{q'i}, v)$ and otherwise $y = 0$. We achieve this by introducing additional binary variables $\bar{y}_s, \ubar{y}_{s'}$ for each $B_s \in \bar{S}$ and for each $B_{s'} \in \ubar{S}$ respectively, along with the following constraints, in the \SP{}:
+We now must ensure that newly priced columns $x_{q'}$ are assigned a coefficient of $y = 1$ for the branching decision if $q' \in Q(S)$, i.e., if $\forall (x_i, \eta, v) \in S. \eta(x_{q'i}, v)$ and otherwise $y = 0$. We achieve this by introducing additional binary variables $\bar{y}_s, \ubar{y}_{s'}$ for each $B_s \in \bar{S}$ and for each $B_{s'} \in \ubar{S}$ respectively, along with the following constraints, in the \SP{} \cite{thebook}:
+
 \begin{equation}
 \begin{aligned}
 y = 1 &\Leftrightarrow \sum_{B_s \in \bar{S}} \bar{y}_s + \sum_{B_s \in \ubar{S}} \ubar{y}_s = \abs{S} &\\
@@ -103,14 +104,14 @@ y &\in \{0, 1\} & \\
 \end{aligned}
 \end{equation}
 
-What remains is to express all logical equivalences using a finite set of linear constraints. For this, we can use the following observations:
+What remains is to express all logical equivalences using a finite set of linear constraints. For this, following observations are crucial \cite{thebook}:
 
 \begin{itemize}
 \item In the down branch, since $-\gamma_{\downarrow} \geq 0$, $y$ naturally takes the value $0$ and so do all $\bar{y}_s$ and $\ubar{y}_{s'}$. Thus, in the down branch, we need to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $1$ if the corresponding component bounds are satisfied, and force $y$ to $1$ if all $\bar{y}_s$ and $\ubar{y}_{s'}$ equal $1$.
 \item In the up branch, the opposite is the case: since $-\gamma_{\uparrow} \leq 0$, $y$ and all $\bar{y}_s, \ubar{y}_{s'}$ naturally take the value $1$, requiring us to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $0$ if their corresponding component bounds are not satisfied, and force $y$ to $0$ if any of the $\bar{y}_s, \ubar{y}_{s'}$ equals $0$.
 \end{itemize}
 
-Given that we require a bounded \IP{} to begin with, let us denote the lower and upper bounds of a variable $x_i$ as $\text{lb}_i$ and $\text{ub}_i$ respectively. Using the above observations, we can now express the logical equivalences mandated by the branching decision as follows:
+Given that we require a bounded \IP{} to begin with, let us denote the lower and upper bounds of a variable $x_i$ as $\text{lb}_i$ and $\text{ub}_i$ respectively. Using the above observations, we can now express the logical equivalences mandated by the branching decision as follows \cite{thebook}:
 
 \begin{multicols}{2}
 \noindent
@@ -143,4 +144,4 @@ y &\leq \ubar{y}_s &\qquad \forall B_s \in \ubar{S} \\
 \end{minipage}
 \end{multicols}
 
-We have now successfully defined the branching decision in the master problem and the corresponding constraints in the pricing problem. Until we find an optimal integral solution of master variables, we will continue to branch using a suitable component bound sequence $S$, creating a binary branch-and-bound search tree. In the next section, we present an algorithm responsible for finding such an $S$ given a fractional master solution $\vec{\lambda}^*_\RMP{}$.
+We have now successfully defined the branching decision in the master problem and the corresponding constraints in the pricing problem. Until we find an optimal integral solution of master variables, we will continue to branch using a suitable component bound sequence $S$, creating a binary search tree. In the next section, we present an algorithm responsible for finding such an $S$ given a fractional master solution $\vec{\lambda}^*_\RMP{}$.

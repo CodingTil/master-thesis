@@ -20,7 +20,7 @@ z^*_\SP{} = -\pi_0 + &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transp
 \end{aligned}
 \end{equation*}
 
-A common approach to compute a lower bound on $z^*_\IP{}$ is to perform a \textit{Lagrangian relaxation}. In this Lagrangian relaxation, we penalize the violation $(\vec{b} - \mat{A} \vec{x})$ of the complicating constraints using \textit{Lagrangian multipliers} $\vec{\pi}_\vec{b}$, yielding the following \textit{Lagrangian subproblem} or \textit{Lagrangian function} \cite{thebook}:
+A common approach to compute a lower bound on $z^*_\IP{}$ is to perform a \textit{Lagrangian relaxation} (\LR{}). In this Lagrangian relaxation, we penalize the violation $(\vec{b} - \mat{A} \vec{x})$ of the complicating constraints using \textit{Lagrangian multipliers} $\vec{\pi}_\vec{b}$, yielding the following \textit{Lagrangian subproblem} or \textit{Lagrangian function} \cite{thebook}:
 
 \begin{equation*}
 \begin{aligned}
@@ -35,7 +35,7 @@ A common approach to compute a lower bound on $z^*_\IP{}$ is to perform a \texti
 
 Notice that both the Lagrangian subproblem and pricing problem are equivalent, except for a constant offset in their objective functions.
 
-The quality of the lower bound provided by the Lagrangian relaxation depends on the choice of the Lagrangian multipliers ($\forall \vec{\pi}_\vec{b} > \vec{0}. \; \LR{\vec{\pi}_\vec{b}} \leq z^*_\IP{}$ \cite{thebook}). To find the greatest lower bound, i.e., the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$ that maximize the Lagrangian subproblem, we solve the \textit{Lagrangian dual problem}:
+The quality of the lower bound provided by the Lagrangian relaxation depends on the choice of the Lagrangian multipliers ($\forall \vec{\pi}_\vec{b} > \vec{0}. \; \LR{\vec{\pi}_\vec{b}} \leq z^*_\IP{}$ \cite{thebook}). To find the greatest lower bound, i.e., the optimal Lagrangian multipliers $\vec{\pi}_\vec{b}^*$ that maximize the Lagrangian subproblem, we solve the \textit{Lagrangian dual problem} (\LDP{}):
 
 \begin{equation*}
 z^*_\LDP{} = \underset{\vec{\pi}_\vec{b} \geq \vec{0}}{\min} \; \LR{\vec{\pi}_\vec{b}}
