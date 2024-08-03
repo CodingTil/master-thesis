@@ -1,3 +1,6 @@
+svg-inkscape/
+*-SAVE-ERROR
+
 # LaTeX build files
 *.aux
 *.log

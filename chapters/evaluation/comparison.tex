@@ -1,1 +1,93 @@
-\section{Practical Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison}
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/solve_status.svg}
+		\caption{\texttt{MostFractional}: solve status}
+		\label{fig:mostfractional_solve_status}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/solve_status.svg}
+		\caption{\texttt{ClosestToZHalf}: solve status}
+		\label{fig:closesttozhalf_solve_status}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/nodes.svg}
+		\caption{\texttt{MostFractional}: nodes}
+		\label{fig:mostfractional_nodes}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/nodes.svg}
+		\caption{\texttt{ClosestToZHalf}: nodes}
+		\label{fig:closesttozhalf_nodes}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/times.svg}
+		\caption{\texttt{MostFractional}: times}
+		\label{fig:mostfractional_times}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/times.svg}
+		\caption{\texttt{ClosestToZHalf}: times}
+		\label{fig:closesttozhalf_times}
+	\end{subfigure}
+
+	\caption{Comparison of all run configurations. In the boxplots the dots represent the arithmetic mean of the data. Note the differing scales in Figures \ref{fig:mostfractional_times} and \ref{fig:closesttozhalf_times}.}
+	\label{fig:comparison_general}
+\end{figure}
+
+\section{Comparison of the different Separation Heuristics}\label{sec:evaluation_comparison_separation}
+We begin by comparing the different separation heuristics with and without full-tree dual value stabilization. We have run the test set on 12 different configurations of the component bound branching rule, varying the first- and second-stage separation heuristic (Section \ref{sec:cmpbnd_separation}) and the stabilization method. These runs have been named in the following way: if both the \texttt{MaxRangeMidrange} and \texttt{MostDistinctMedian} first-stage separation heuristics have been used, the run is simply named \texttt{compbnd}. If only \texttt{MaxRangeMidrange} was used, we name the run \texttt{compbnd-mrm}. Analogously, if only \texttt{MostDistinctMedian} was used, we name the run \texttt{compbnd-mdm}. When full-tree dual value stabilization was applied, we append \texttt{+dvs} to the run name. Otherwise, i.e., when stabilizing the dual values only in the root node, we do not append any suffix. For example, the run \texttt{compbnd-mdm+dvs} uses the \texttt{MostDistinctMedian} first-stage separation heuristic and full-tree dual value stabilization.
+
+Furthermore, we have proposed two options for the second-stage separation heuristic: the \texttt{ClosedToZHalf} and \texttt{MostFractional} heuristics. For the purpose of readability, we have grouped all runs by their second-stage separation heuristic, and we will present them in separate figures.
+
+For reference, we also include the results of Vanderbeck's generic branching scheme, denoted as \texttt{generic}. This allows us to compare the performance of the component bound branching rule to the generic branching scheme, which we will discuss in more detail in Section \ref{sec:evaluation_comparison_generic}.
+
+Analyzing the results presented in Figure \ref{fig:comparison_general}, we make a few key observations. First, we notice that full-tree dual value stabilization on average degrades the performance of the component bound branching rule. Our second observation is with regard to the second-stage separation heuristics: all runs with the \texttt{MostFractional} heuristic significantly outperform those with the \texttt{ClosestToZHalf} heuristic
+
+When taking a closer look at the best performing configurations, i.e. those using the \texttt{MostFractional} second-stage heuristic, we make another observation: the number of instances solved as well as the solving times can be significantly improved when using both instead of just one of the first-stage separation heuristics. We do also recognize a similar pattern for the \texttt{ClosestToZHalf} configurations. This suggests that neither of the two proposed first-stage separation heuristics universally finds an optimal component bound sequences to branch on, and it underpins the importance of the second-stage heuristic to find the best out of many branching decisions.
+
+Finally, we do not observe any correlation between the number of nodes generated and the solving time across all configurations.
+
+\section{In-Depth Analysis of the First-Stage Separation Heuristics}\label{sec:evaluation_comparison_separation_firststage}
+
+\section{Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison_generic}
+Recapitulating Section \ref{sec:cmpbnd_simdif}, the major difference between Vanderbeck's generic scheme and the component bound branching rule is their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) in all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem. This often necessitates falling back to a general \MIP{} solver, causing performance loss. Additionally, the deeper we go in the tree, the more variables and constraints the \texttt{COMPBND} rule adds, further slowing the pricing problem. In contrast, the \texttt{GENERIC} rule's pricing problems become easier to solve deeper in the tree due to tighter bounds. Thus, we expect the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, especially for larger instances.
+
+This expectation is verified in our results (Figure \ref{fig:comparison_general}). Vanderbeck's generic branching scheme solves all those instances solved by any of the component bound branching rule configurations, and more. And it does so in significantly less time.
+
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/outperforms_generic.svg}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/outperforms_generic.svg}
+	\end{subfigure}
+
+	\caption{Outperformance rates of the different component bound branching configurations over Vanderbeck's generic branching scheme.}
+	\label{fig:comparison_outperform}
+\end{figure}
+
+Figure \ref{fig:comparison_outperform} illustrates an important metric: how often can the component bound branching rule outperform Vanderbeck's generic branching scheme? Our previously observation that the \texttt{MostFractional} second-stage heuristic outperforms the \texttt{ClosestToZHalf} heuristic can be seen here as well. Quite notable is that we can outperform generic branching in at least a third of the instances, when using the \texttt{MostFractional} second-stage heuristic and at least the \texttt{MostDistinctMedian} first-stage heuristic. Most surprisingly, however, is that the highest outperformance rate is achieved when only using the \texttt{MostDistinctMedian} first-stage heuristic. Combining it with the \texttt{MaxRangeMidrange} heuristic actually decreases the outperformance rate. This suggests that the \texttt{MostDistinctMedian} heuristic is the most effective first-stage separation heuristic, and that the \texttt{MaxRangeMidrange} heuristic is not as effective as we initially thought.
+
+Based on these observations, the component bound branching rule can be a viable alternative to Vanderbeck's generic branching scheme on specific instances, especially when using the right configuration. However, as Vanderbeck's generic scheme is generally faster and solves more instances, it remains the better choice for most instances and should by default be chosen over the component bound branching rule.
