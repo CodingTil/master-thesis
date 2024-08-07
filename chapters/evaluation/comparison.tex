@@ -1,14 +1,14 @@
 \begin{figure}
 	\centering
 
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/MostFractional/solve_status.svg}
 		\caption{\texttt{MostFractional}: solve status}
 		\label{fig:mostfractional_solve_status}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/solve_status.svg}
 		\caption{\texttt{ClosestToZHalf}: solve status}
@@ -17,14 +17,14 @@
 
 	\vspace{1em}
 
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/MostFractional/nodes.svg}
 		\caption{\texttt{MostFractional}: nodes}
 		\label{fig:mostfractional_nodes}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/nodes.svg}
 		\caption{\texttt{ClosestToZHalf}: nodes}
@@ -33,14 +33,14 @@
 
 	\vspace{1em}
 
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/MostFractional/times.svg}
 		\caption{\texttt{MostFractional}: times}
 		\label{fig:mostfractional_times}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/times.svg}
 		\caption{\texttt{ClosestToZHalf}: times}
@@ -64,8 +64,6 @@ When taking a closer look at the best performing configurations, i.e. those usin
 
 Finally, we do not observe any correlation between the number of nodes generated and the solving time across all configurations.
 
-\section{In-Depth Analysis of the First-Stage Separation Heuristics}\label{sec:evaluation_comparison_separation_firststage}
-
 \section{Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison_generic}
 Recapitulating Section \ref{sec:cmpbnd_simdif}, the major difference between Vanderbeck's generic scheme and the component bound branching rule is their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) in all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem. This often necessitates falling back to a general \MIP{} solver, causing performance loss. Additionally, the deeper we go in the tree, the more variables and constraints the \texttt{COMPBND} rule adds, further slowing the pricing problem. In contrast, the \texttt{GENERIC} rule's pricing problems become easier to solve deeper in the tree due to tighter bounds. Thus, we expect the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, especially for larger instances.
 
@@ -74,12 +72,12 @@ This expectation is verified in our results (Figure \ref{fig:comparison_general}
 \begin{figure}
 	\centering
 
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/MostFractional/outperforms_generic.svg}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/outperforms_generic.svg}
 	\end{subfigure}
@@ -91,3 +89,81 @@ This expectation is verified in our results (Figure \ref{fig:comparison_general}
 Figure \ref{fig:comparison_outperform} illustrates an important metric: how often can the component bound branching rule outperform Vanderbeck's generic branching scheme? Our previously observation that the \texttt{MostFractional} second-stage heuristic outperforms the \texttt{ClosestToZHalf} heuristic can be seen here as well. Quite notable is that we can outperform generic branching in at least a third of the instances, when using the \texttt{MostFractional} second-stage heuristic and at least the \texttt{MostDistinctMedian} first-stage heuristic. Most surprisingly, however, is that the highest outperformance rate is achieved when only using the \texttt{MostDistinctMedian} first-stage heuristic. Combining it with the \texttt{MaxRangeMidrange} heuristic actually decreases the outperformance rate. This suggests that the \texttt{MostDistinctMedian} heuristic is the most effective first-stage separation heuristic, and that the \texttt{MaxRangeMidrange} heuristic is not as effective as we initially thought.
 
 Based on these observations, the component bound branching rule can be a viable alternative to Vanderbeck's generic branching scheme on specific instances, especially when using the right configuration. However, as Vanderbeck's generic scheme is generally faster and solves more instances, it remains the better choice for most instances and should by default be chosen over the component bound branching rule.
+
+\section{In-Depth Analysis of the First-Stage Separation Heuristics}\label{sec:evaluation_comparison_separation_firststage}
+
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/num_bounds.svg}
+		\caption{Distribution of the number of bounds created while branching}
+		\label{fig:compbnd-mrm_num_bounds}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/avg_num_bounds.svg}
+		\caption{Average number of bounds created while branching}
+		\label{fig:compbnd_avg_num_bounds}
+	\end{subfigure}
+
+	\caption{Left: distribution of the number of bounds created at each node for the different configurations. Note the logarithmic scale. Right: average number of bounds created overall for the different configuration.}
+	\label{fig:comparison_bounds}
+\end{figure}
+
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd/depths_distribution.svg}
+		\caption{\texttt{compbnd(+dvs)}: Number of branching decisions per depth}
+		\label{fig:compbnd_depths_distribution}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd/avg_num_bounds_vs_depth.svg}
+		\caption{\texttt{compbnd(+dvs)}: Average number of bounds per depth (95\% CI)}
+		\label{fig:compbnd_avg_num_bounds_vs_depth}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd-mdm/depths_distribution.svg}
+		\caption{\texttt{compbnd-mdm(+dvs)}: Number of branching decisions per depth}
+		\label{fig:compbnd-mdm_depths_distribution}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd-mdm/avg_num_bounds_vs_depth.svg}
+		\caption{\texttt{compbnd-mdm(+dvs)}: Average number of bounds per depth (95\% CI)}
+		\label{fig:compbnd-mdm_avg_num_bounds_vs_depth}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd-mrm/depths_distribution.svg}
+		\caption{\texttt{compbnd-mrm(+dvs)}: Number of branching decisions per depth}
+		\label{fig:compbnd-mrm_depths_distribution}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/bound_stats/compbnd-mrm/avg_num_bounds_vs_depth.svg}
+		\caption{\texttt{compbnd-mrm(+dvs)}: Average number of bounds per depth (95\% CI)}
+		\label{fig:compbnd-mrm_avg_num_bounds_vs_depth}
+	\end{subfigure}
+
+	\caption{Left: number of branching decisions per depth. Right: average number of component bounds per depth, with 95\% confidence interval (smoothed).}
+	\label{fig:comparison_depth}
+\end{figure}
+
+Hello
