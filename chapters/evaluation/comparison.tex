@@ -52,22 +52,22 @@
 \end{figure}
 
 \section{Comparison of the different Separation Heuristics}\label{sec:evaluation_comparison_separation}
-We begin by comparing the different separation heuristics with and without full-tree dual value stabilization. We have run the test set on 12 different configurations of the component bound branching rule, varying the first- and second-stage separation heuristic (Section \ref{sec:cmpbnd_separation}) and the stabilization method. These runs have been named in the following way: if both the \texttt{MaxRangeMidrange} and \texttt{MostDistinctMedian} first-stage separation heuristics have been used, the run is simply named \texttt{compbnd}. If only \texttt{MaxRangeMidrange} was used, we name the run \texttt{compbnd-mrm}. Analogously, if only \texttt{MostDistinctMedian} was used, we name the run \texttt{compbnd-mdm}. When full-tree dual value stabilization was applied, we append \texttt{+dvs} to the run name. Otherwise, i.e., when stabilizing the dual values only in the root node, we do not append any suffix. For example, the run \texttt{compbnd-mdm+dvs} uses the \texttt{MostDistinctMedian} first-stage separation heuristic and full-tree dual value stabilization.
+We compared different separation heuristics with and without full-tree dual value stabilization by running the test set on 12 configurations of the component bound branching rule. These configurations varied the first- and second-stage separation heuristics (Section \ref{sec:cmpbnd_separation}) and the stabilization method. The naming conventions for these runs are as follows: runs using both the \texttt{MaxRangeMidrange} and \texttt{MostDistinctMedian} first-stage heuristics are named \texttt{compbnd}. Runs using only \texttt{MaxRangeMidrange} are named \texttt{compbnd-mrm}, and those using only the \texttt{MostDistinctMedian} heuristic are named \texttt{compbnd-mdm}. If full-tree dual value stabilization was applied, \texttt{+dvs} is appended to the name. For example, \texttt{compbnd-mdm+dvs} uses the \texttt{MostDistinctMedian} heuristic with full-tree dual value stabilization.
 
-Furthermore, we have proposed two options for the second-stage separation heuristic: the \texttt{ClosedToZHalf} and \texttt{MostFractional} heuristics. For the purpose of readability, we have grouped all runs by their second-stage separation heuristic, and we will present them in separate figures.
+We also proposed two options for the second-stage heuristic: \texttt{ClosestToZHalf} and \texttt{MostFractional}. For readability, we grouped all runs by their second-stage heuristic and presented their statistics in separate figures.
 
-For reference, we also include the results of Vanderbeck's generic branching scheme, denoted as \texttt{generic}. This allows us to compare the performance of the component bound branching rule to the generic branching scheme, which we will discuss in more detail in Section \ref{sec:evaluation_comparison_generic}.
+For reference, we included Vanderbeck's generic branching scheme results, denoted as \texttt{generic}. This allowed us to compare the component bound branching rule’s performance against the established generic branching scheme.
 
-Analyzing the results presented in Figure \ref{fig:comparison_general}, we make a few key observations. First, we notice that full-tree dual value stabilization on average degrades the performance of the component bound branching rule. Our second observation is with regard to the second-stage separation heuristics: all runs with the \texttt{MostFractional} heuristic significantly outperform those with the \texttt{ClosestToZHalf} heuristic
+Analyzing the results in Figure \ref{fig:comparison_general}, several key observations emerge. First, full-tree dual value stabilization generally degrades the performance of the component bound branching rule. Second, runs using the \texttt{MostFractional} heuristic significantly outperform those using the \texttt{ClosestToZHalf} heuristic.
 
-When taking a closer look at the best performing configurations, i.e. those using the \texttt{MostFractional} second-stage heuristic, we make another observation: the number of instances solved as well as the solving times can be significantly improved when using both instead of just one of the first-stage separation heuristics. We do also recognize a similar pattern for the \texttt{ClosestToZHalf} configurations. This suggests that neither of the two proposed first-stage separation heuristics universally finds an optimal component bound sequences to branch on, and it underpins the importance of the second-stage heuristic to find the best out of many branching decisions.
+Among the best-performing configurations—those using the \texttt{MostFractional} second-stage heuristic—the number of instances solved and the solving times significantly improve when using both first-stage heuristics instead of just one. This pattern suggests that neither first-stage heuristic universally finds the optimal component bound sequences, highlighting the importance of the second-stage heuristic in selecting the best branching decisions.
 
-Finally, we do not observe any correlation between the number of nodes generated and the solving time across all configurations.
+Interestingly, there is no clear correlation between the number of nodes generated and the solving time across all configurations.
 
 \section{Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison_generic}
-Recapitulating Section \ref{sec:cmpbnd_simdif}, the major difference between Vanderbeck's generic scheme and the component bound branching rule is their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) in all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem. This often necessitates falling back to a general \MIP{} solver, causing performance loss. Additionally, the deeper we go in the tree, the more variables and constraints the \texttt{COMPBND} rule adds, further slowing the pricing problem. In contrast, the \texttt{GENERIC} rule's pricing problems become easier to solve deeper in the tree due to tighter bounds. Thus, we expect the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, especially for larger instances.
+As discussed in Section \ref{sec:cmpbnd_simdif}, the main difference between Vanderbeck's generic scheme and the component bound branching rule is in their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) at all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem, often necessitating a fallback to a general \MIP{} solver, which degrades performance. Additionally, as the search tree deepens, the \texttt{COMPBND} rule further complicates the pricing problem by adding more variables and constraints, whereas the \texttt{GENERIC} rule’s pricing problems become easier to solve due to tighter bounds. Thus, we expected the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, particularly for larger instances.
 
-This expectation is verified in our results (Figure \ref{fig:comparison_general}). Vanderbeck's generic branching scheme solves all those instances solved by any of the component bound branching rule configurations, and more. And it does so in significantly less time.
+This expectation is confirmed by our results (Figure \ref{fig:comparison_general}). Vanderbeck's generic branching scheme solves more instances and does so in significantly less time compared to any configuration of the component bound branching rule.
 
 \begin{figure}
 	\centering
@@ -86,11 +86,14 @@ This expectation is verified in our results (Figure \ref{fig:comparison_general}
 	\label{fig:comparison_outperform}
 \end{figure}
 
-Figure \ref{fig:comparison_outperform} illustrates an important metric: how often can the component bound branching rule outperform Vanderbeck's generic branching scheme? Our previously observation that the \texttt{MostFractional} second-stage heuristic outperforms the \texttt{ClosestToZHalf} heuristic can be seen here as well. Quite notable is that we can outperform generic branching in at least a third of the instances, when using the \texttt{MostFractional} second-stage heuristic and at least the \texttt{MostDistinctMedian} first-stage heuristic. Most surprisingly, however, is that the highest outperformance rate is achieved when only using the \texttt{MostDistinctMedian} first-stage heuristic. Combining it with the \texttt{MaxRangeMidrange} heuristic actually decreases the outperformance rate. This suggests that the \texttt{MostDistinctMedian} heuristic is the most effective first-stage separation heuristic, and that the \texttt{MaxRangeMidrange} heuristic is not as effective as we initially thought.
+Figure \ref{fig:comparison_outperform} shows how often the component bound branching rule outperforms Vanderbeck's generic branching scheme. The \texttt{MostFractional} second-stage heuristic consistently outperforms the \texttt{ClosestToZHalf} heuristic. Notably, the highest outperformance rate is achieved when only using the \texttt{MostDistinctMedian} first-stage heuristic. Combining it with the \texttt{MaxRangeMidrange} heuristic actually decreases the outperformance rate, suggesting that \texttt{MostDistinctMedian} is the most effective first-stage heuristic, while \texttt{MaxRangeMidrange} may not be as beneficial.
 
-Based on these observations, the component bound branching rule can be a viable alternative to Vanderbeck's generic branching scheme on specific instances, especially when using the right configuration. However, as Vanderbeck's generic scheme is generally faster and solves more instances, it remains the better choice for most instances and should by default be chosen over the component bound branching rule.
+These findings indicate that the component bound branching rule can be a viable alternative to Vanderbeck's generic branching scheme for specific instances, especially with the right configuration. However, given that the generic scheme is generally faster and solves more instances, it remains the preferred choice for most instances.
 
-\section{In-Depth Analysis of the First-Stage Separation Heuristics}\label{sec:evaluation_comparison_separation_firststage}
+\section{In-Depth Analysis of the First-Stage Separation Heuristics and the Effect of Dual Value stabilization}\label{sec:evaluation_comparison_separation_firststage}
+We now examine the first-stage separation heuristics in more detail, focusing on the selected component bound sequences for branching. Since the \texttt{MostFractional} second-stage heuristic significantly outperforms the \texttt{ClosestToZHalf} heuristic, we limit our analysis to configurations using the former. For each configuration and all instances, we logged the size of the component bound sequences at each node.
+
+Although the \texttt{compbnd} configuration always selects the minimal component bound sequence from the two first-stage heuristics, this does not mean it branches with fewer component bounds on average compared to the \texttt{compbnd-mrm} or \texttt{compbnd-mdm} configurations. Current branching decisions influence future opportunities, and mixing both first-stage heuristics can lead to more component bounds per branching decision.
 
 \begin{figure}
 	\centering
@@ -99,7 +102,7 @@ Based on these observations, the component bound branching rule can be a viable 
 		\centering
 		\includesvg[width=\textwidth]{images/bound_stats/num_bounds.svg}
 		\caption{Distribution of the number of bounds created while branching}
-		\label{fig:compbnd-mrm_num_bounds}
+		\label{fig:compbnd_num_bounds}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.495\textwidth}
@@ -112,6 +115,8 @@ Based on these observations, the component bound branching rule can be a viable 
 	\caption{Left: distribution of the number of bounds created at each node for the different configurations. Note the logarithmic scale. Right: average number of bounds created overall for the different configuration.}
 	\label{fig:comparison_bounds}
 \end{figure}
+
+Figure \ref{fig:compbnd_num_bounds} shows the distribution of the number of component bounds created for each branching decision. The data indicates that it is rare to branch with a component bound sequence larger than 4. Most cases involve sequences of size 1 or 2, as seen in Figure \ref{fig:compbnd_avg_num_bounds}. Additionally, both first-stage heuristics individually create more bounds on average than their combination, likely explaining why the \texttt{compbnd} configuration outperforms the others (Section \ref{sec:evaluation_comparison_separation}).
 
 \begin{figure}
 	\centering
@@ -166,4 +171,12 @@ Based on these observations, the component bound branching rule can be a viable 
 	\label{fig:comparison_depth}
 \end{figure}
 
-Hello
+Figure \ref{fig:comparison_depth} illustrates the number of branching decisions per depth and the average number of component bounds per branching decision across different depths. Given that the \texttt{COMPBND} rule creates a binary search tree and each instance is solved with only a few hundred nodes (Figure \ref{fig:mostfractional_nodes}), most branching decisions occur at depths in the low hundreds. Consequently, we plotted the average number of component bounds per branching decision up to depth 500.
+
+Our first observation is that full-tree dual value stabilization has little effect on the average number of component bounds per branching decision. Since each configuration produces a similar number of nodes with and without stabilization (Figure \ref{fig:mostfractional_nodes}), the search trees are roughly similar. This allows us to assess whether the benefits of dual value stabilization outweigh the management cost in non-root nodes. The performance degradation discussed in Section \ref{sec:evaluation_comparison_separation} suggests the answer is no.
+
+For all configurations, the average number of component bounds per branching decision rises steeply until around depth 100, then stabilizes and gradually falls, though variation increases. This behavior can be explained as follows: in the initial levels, there are many fractional columns, but few branching decisions have been imposed, making it easy to split the columns into two groups. As branching continues, the number of fractional columns remains high, but many constraints have already been imposed, making it harder to find separating component bound sequences, requiring more component bounds. Eventually, the number of fractional columns decreases, making it easier to find separating component bounds again. The point at which this tipping occurs likely depends on the instance.
+
+We also observe differences between using only the \texttt{MostDistinctMedian}, the \texttt{MaxRangeMidrange}, or both first-stage separation heuristics. The combination of the two peaks at the least value out of the three configurations, while the \texttt{MaxRangeMidrange} configuration peaks the highest. However, it is also the fastest to drop back to an average of just over one, while the \texttt{MostDistinctMedian} configuration hovers at its peak for over 200 depths before decreasing.
+
+The narrow confidence interval until depth 100, despite significant changes in the mean, is surprising. The sudden drop in the average number of component bounds at very shallow depths, followed by a steep rise, remains unexplained.
