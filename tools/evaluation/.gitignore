@@ -1,0 +1,3 @@
+results_*/**
+!results_*/*.res
+!results_stats/*.csv

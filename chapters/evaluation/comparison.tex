@@ -47,7 +47,7 @@
 		\label{fig:closesttozhalf_times}
 	\end{subfigure}
 
-	\caption{Comparison of all run configurations. In the boxplots the dots represent the arithmetic mean of the data. Note the differing scales in Figures \ref{fig:mostfractional_times} and \ref{fig:closesttozhalf_times}.}
+	\caption{Comparison of all run configurations. In the boxplots the dots represent the arithmetic mean of the data. Outliers are not visualized. Note the differing scales in Figures \ref{fig:mostfractional_times} and \ref{fig:closesttozhalf_times}.}
 	\label{fig:comparison_general}
 \end{figure}
 
@@ -56,18 +56,11 @@ We compared different separation heuristics with and without full-tree dual valu
 
 We also proposed two options for the second-stage heuristic: \texttt{ClosestToZHalf} and \texttt{MostFractional}. For readability, we grouped all runs by their second-stage heuristic and presented their statistics in separate figures.
 
-For reference, we included Vanderbeck's generic branching scheme results, denoted as \texttt{generic}. This allowed us to compare the component bound branching rule’s performance against the established generic branching scheme.
+For reference, we included Vanderbeck's generic branching scheme results, denoted as \texttt{generic}. This allows us to compare the component bound branching rule's performance against generic branching scheme. As discussed in Section \ref{sec:cmpbnd_simdif}, we expect the generic branching scheme to outperform the component bound branching rule, partially due to the latter having to fall back to a general \MIP{} solver, while the former may retain the ability to use special-case solving algorithms after branching. To measure the impact of having to resort to a \MIP{} solver, we also included a configuration of Vanderbeck's scheme in which we force the use of a \MIP{} solver at all non-root nodes, denoted as \texttt{generic-mip}.
 
 Analyzing the results in Figure \ref{fig:comparison_general}, several key observations emerge. First, full-tree dual value stabilization generally degrades the performance of the component bound branching rule. Second, runs using the \texttt{MostFractional} heuristic significantly outperform those using the \texttt{ClosestToZHalf} heuristic.
 
-Among the best-performing configurations—those using the \texttt{MostFractional} second-stage heuristic—the number of instances solved and the solving times significantly improve when using both first-stage heuristics instead of just one. This pattern suggests that neither first-stage heuristic universally finds the optimal component bound sequences, highlighting the importance of the second-stage heuristic in selecting the best branching decisions.
-
-Interestingly, there is no clear correlation between the number of nodes generated and the solving time across all configurations.
-
-\section{Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison_generic}
-As discussed in Section \ref{sec:cmpbnd_simdif}, the main difference between Vanderbeck's generic scheme and the component bound branching rule is in their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) at all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem, often necessitating a fallback to a general \MIP{} solver, which degrades performance. Additionally, as the search tree deepens, the \texttt{COMPBND} rule further complicates the pricing problem by adding more variables and constraints, whereas the \texttt{GENERIC} rule’s pricing problems become easier to solve due to tighter bounds. Thus, we expected the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, particularly for larger instances.
-
-This expectation is confirmed by our results (Figure \ref{fig:comparison_general}). Vanderbeck's generic branching scheme solves more instances and does so in significantly less time compared to any configuration of the component bound branching rule.
+Among the best-performing configurations, i.e., those using the \texttt{MostFractional} second-stage heuristic, the number of instances solved and the solving times significantly improve when using both first-stage heuristics instead of just one. This pattern suggests that neither first-stage heuristic universally finds the optimal component bound sequences, highlighting the importance of the second-stage heuristic in selecting the best branching decisions.
 
 \begin{figure}
 	\centering
@@ -82,13 +75,39 @@ This expectation is confirmed by our results (Figure \ref{fig:comparison_general
 		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/outperforms_generic.svg}
 	\end{subfigure}
 
-	\caption{Outperformance rates of the different component bound branching configurations over Vanderbeck's generic branching scheme.}
+	\caption{Percentage of instances solved faster by the configurations of the component bound branching rule compared to \texttt{generic}.}
 	\label{fig:comparison_outperform}
 \end{figure}
 
+\section{Comparison to Vanderbeck's Generic Branching}\label{sec:evaluation_comparison_generic}
+As discussed in Section \ref{sec:cmpbnd_simdif}, the main difference between Vanderbeck's generic scheme and the component bound branching rule is in their modifications to the pricing problem. The \texttt{GENERIC} rule retains the pricing structure, allowing the use of specialized algorithms (e.g., knapsack solvers) at all nodes. In contrast, the \texttt{COMPBND} rule adds variables and constraints to the pricing problem, often necessitating a fallback to a general \MIP{} solver, which may degrade performance. Additionally, as the search tree deepens, the \texttt{COMPBND} rule further complicates the pricing problem by adding more variables and constraints, whereas the \texttt{GENERIC} rule's pricing problems become easier to solve due to tighter bounds. Thus, we expected the \texttt{GENERIC} rule to outperform the \texttt{COMPBND} rule, particularly for larger instances.
+
+This expectation is confirmed by our results (Figure \ref{fig:comparison_general}). Vanderbeck's generic branching scheme solves more instances and does so in significantly less time compared to any configuration of the component bound branching rule.
+
 Figure \ref{fig:comparison_outperform} shows how often the component bound branching rule outperforms Vanderbeck's generic branching scheme. The \texttt{MostFractional} second-stage heuristic consistently outperforms the \texttt{ClosestToZHalf} heuristic. Notably, the highest outperformance rate is achieved when only using the \texttt{MostDistinctMedian} first-stage heuristic. Combining it with the \texttt{MaxRangeMidrange} heuristic actually decreases the outperformance rate, suggesting that \texttt{MostDistinctMedian} is the most effective first-stage heuristic, while \texttt{MaxRangeMidrange} may not be as beneficial.
 
-These findings indicate that the component bound branching rule can be a viable alternative to Vanderbeck's generic branching scheme for specific instances, especially with the right configuration. However, given that the generic scheme is generally faster and solves more instances, it remains the preferred choice for most instances.
+The surprisingly large outperformance rates we see for the \texttt{MostFractional} second-stage heuristic should be taken with a grain of salt. When we take a closer look at those instances, we observe that most of them are solved within 40 seconds by either branching rule, and often only a few seconds were saved. Therefore, the impact of this outperformance is limited. Especially given that the generic scheme is generally faster and solves more instances, it remains the preferred choice for most instances.
+
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/outperforms_generic-mip.svg}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/outperforms_generic-mip.svg}
+	\end{subfigure}
+
+	\caption{Percentage of instances solved faster by the configurations of the component bound branching rule compared to \texttt{generic-mip}.}
+	\label{fig:comparison_outperform_generic_mip}
+\end{figure}
+
+Things change quite a bit for Vanderbeck's generic branching when we enforce the use of a \MIP{} solver for the pricing problem in non-root nodes. Although this \texttt{generic-mip} configuration produces fewer nodes, possibly due to more suitable columns being generated, having to rely on a \MIP{} solver imposes a great performance penalty, see Figure \ref{fig:comparison_general}. It seems as if creating a smaller search tree is far more beneficial than having to solve more complex pricing problems. Even the configurations of the weaker \texttt{ClosestToZHalf} second-stage heuristic seemingly perform on par with the generic branching scheme when it is forced to use a \MIP{} solver for pricing. The \texttt{MostFractional} second-stage heuristic configurations clearly outperform the generic branching scheme in this scenario, as shown in Figure \ref{fig:comparison_outperform_generic_mip}.
+
+These findings suggest that the component bound branching rule can be a viable alternative to Vanderbeck's branching scheme when no specialized algorithms are available for the pricing problem. However, the generic branching scheme remains the preferred choice when such algorithms are available.
 
 \section{In-Depth Analysis of the First-Stage Separation Heuristics and the Effect of Dual Value stabilization}\label{sec:evaluation_comparison_separation_firststage}
 We now examine the first-stage separation heuristics in more detail, focusing on the selected component bound sequences for branching. Since the \texttt{MostFractional} second-stage heuristic significantly outperforms the \texttt{ClosestToZHalf} heuristic, we limit our analysis to configurations using the former. For each configuration and all instances, we logged the size of the component bound sequences at each node.
@@ -173,7 +192,7 @@ Figure \ref{fig:compbnd_num_bounds} shows the distribution of the number of comp
 
 Figure \ref{fig:comparison_depth} illustrates the number of branching decisions per depth and the average number of component bounds per branching decision across different depths. Given that the \texttt{COMPBND} rule creates a binary search tree and each instance is solved with only a few hundred nodes (Figure \ref{fig:mostfractional_nodes}), most branching decisions occur at depths in the low hundreds. Consequently, we plotted the average number of component bounds per branching decision up to depth 500.
 
-Our first observation is that full-tree dual value stabilization has little effect on the average number of component bounds per branching decision. Since each configuration produces a similar number of nodes with and without stabilization (Figure \ref{fig:mostfractional_nodes}), the search trees are roughly similar. This allows us to assess whether the benefits of dual value stabilization outweigh the management cost in non-root nodes. The performance degradation discussed in Section \ref{sec:evaluation_comparison_separation} suggests the answer is no.
+Our first observation is that full-tree dual value stabilization has little effect on the average number of component bounds per branching decision. Since each configuration produces a similar number of nodes with and without stabilization (Figure \ref{fig:mostfractional_nodes}), we further estimate that both search trees are similar. Therefore, as roughly the same amount of nodes are solved with similar complexities of the pricing problems, the performance degradation discussed in Section \ref{sec:evaluation_comparison_separation} suggests that the management cost of dual value stabilization in non-root nodes outweighs the potential performance gains.
 
 For all configurations, the average number of component bounds per branching decision rises steeply until around depth 100, then stabilizes and gradually falls, though variation increases. This behavior can be explained as follows: in the initial levels, there are many fractional columns, but few branching decisions have been imposed, making it easy to split the columns into two groups. As branching continues, the number of fractional columns remains high, but many constraints have already been imposed, making it harder to find separating component bound sequences, requiring more component bounds. Eventually, the number of fractional columns decreases, making it easier to find separating component bounds again. The point at which this tipping occurs likely depends on the instance.
 
