@@ -7,6 +7,7 @@ import scipy.stats as st
 
 from typing import Dict
 
+from hatches import get_hatches
 
 order = [
     "compbnd",
@@ -37,12 +38,12 @@ def plot_num_bounds(name: str, dfs: Dict[str, pd.DataFrame], slides: bool):
         data=proportion_df, x="num_bounds", y="perc_num_bounds", hue="Test Name",
         kind="bar"
     )
-    sns.move_legend(g, loc="upper right", bbox_to_anchor=(1, 0.9))
     #if not slides:
         #g.set(title=f"Distribution of Number of Bounds")
     g.set_axis_labels("Number of Bounds", "Distribution (\\%)")
-    g.legend.set_title("")
     g.figure.get_axes()[0].set_yscale('log')
+    sns.move_legend(g, "upper right", bbox_to_anchor=(1, 0.9))
+    g.legend.set_title("")
 
     # Save the plot as SVG
     plt.tight_layout()
@@ -72,12 +73,12 @@ def plot_num_bounds2(dfs: Dict[str, pd.DataFrame], slides: bool):
         data=proportion_df, x="num_bounds", y="perc_num_bounds", hue="Test Name",
         kind="bar"
     )
-    sns.move_legend(g, loc="upper right", bbox_to_anchor=(1, 0.9))
     #if not slides:
         #g.set(title=f"Distribution of Number of Bounds")
     g.set_axis_labels("Number of Bounds", "Proportion (\\%)")
-    g.legend.set_title("")
     g.figure.get_axes()[0].set_yscale('log')
+    sns.move_legend(g, "upper right", bbox_to_anchor=(1, 0.9))
+    g.legend.set_title("")
 
     # Save the plot as SVG
     plt.tight_layout()

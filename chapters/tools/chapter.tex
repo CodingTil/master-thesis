@@ -1,4 +1,7 @@
-\chapter{SCIP Optimization Suite}\label{ch:tools}
+\chapter{\SCIP{} Optimization Suite}\label{ch:tools}
+The \SCIP{} Optimization Suite is a comprehensive collection of software tools designed to address a wide range of mathematical optimization problems. Central to this suite is the \SCIP{} (Solving Constraint Integer Programs) framework \cite{achterberg2007constraint, achterberg2009scip}, which serves both as a branch-price-and-cut solver and a development platform manly for mixed-integer programming (\MIP{}) and constraint integer programming (\CIP{}).
 
-\input{chapters/tools/scip}
-\input{chapters/tools/gcg}
+In addition to \SCIP{} itself, the \SCIP{} Optimization Suite includes several other tools that complement its functionality, such as aa \LP{} solver, a modeling language, and a parallelization layer for exploiting multi-core and distributed computing resources. For further information, we refer the reader to the official \SCIP{} website\footnote{\url{https://www.scipopt.org/}} as well as \cite{bolusani2024scip}.
+
+\section{GCG}\label{sec:tools_gcg}
+The Generic Column Generation (\GCG{}) solver developed by Gamrath et al. \cite{gamrath2010generic} is a solver implemented using the \SCIP{} framework, specifically designed to implement the Dantzig-Wolfe reformulation and solve optimization problems using column generation and branch-price-and-cut techniques. It works by detecting a suitable decomposition of the problem, reformulating it as a master problem with a set of subproblems using a Dantzig-Wolfe reformulation (see Section \ref{sec:cg_bp_dwr}), and then solving the master problem using column generation (see Section \ref{sec:cg_bp_cg}). So solve \MIP{}s, \GCG{} uses the branch-price-and-cut algorithm, and provides multiple branching strategies, including Vanderbeck's generic branching scheme (see Section \ref{sec:cg_bp_bp_branching_master}). Additionally, \GCG{} supports the stabilization of dual values to improve the convergence of the column generation process (see Section \ref{sec:gm_dvs}).
