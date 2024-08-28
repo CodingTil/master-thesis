@@ -11,7 +11,7 @@ Given $k$ points $\vec{x}_1, \dots, \vec{x}_k \in \mathbb{R}^n$, any $\vec{x} = 
 The set of all convex combinations of $\vec{x}_1, \dots, \vec{x}_k$ is therefore defined as:
 
 \begin{equation*}
-\conv(\vec{x}_1, \dots, \vec{x}_k) \coloneqq \left\{\sum_{i=1}^{k} \alpha_i \vec{x}_i \mid \sum_{i=1}^{k} \alpha_i = 1 \land \forall i \in \{1, \dots, k\}. \alpha_i \geq 0 \right\}
+\conv(\vec{x}_1, \dots, \vec{x}_k) \coloneqq \left\{\sum_{i=1}^{k} \alpha_i \vec{x}_i \mid \alpha_i \geq 0, i=1..k, \sum_{i=1}^{k} \alpha_i = 1\right\}
 \end{equation*}
 \end{definition}
 
@@ -24,18 +24,18 @@ The intersection of two convex sets is convex.
 Let $\polyhedron{P}$ be a convex set. A point $\vec{p} \in \polyhedron{P}$ is an \textbf{extreme point} of $\polyhedron{P}$ if there is no non-trivial convex combination of any two points in $\polyhedron{P}$ expressing $\vec{p}$, i.e.:
 
 \begin{equation*}
-\forall \vec{x}_1, \vec{x}_2 \in \polyhedron{P}. \forall \alpha \in \mathbb{R}_+ \setminus \{0\}. \vec{x}_1 \neq \vec{x}_2 \implies \vec{p} \neq \alpha \vec{x}_1 + (1 - \alpha) \vec{x}_2
+\forall \vec{x}_1, \vec{x}_2 \in \polyhedron{P}. \forall \alpha \in \left(0,1 \right). \vec{x}_1 \neq \vec{x}_2 \implies \vec{p} \neq \alpha \vec{x}_1 + (1 - \alpha) \vec{x}_2
 \end{equation*}
 \end{definition}
 
 % Rays
 \begin{definition}\label{def:rays}
-Let $\polyhedron{P}$ be a convex set. A vector $\vec{r} \in \mathbb{R}_0^n \setminus \{0\}$ is a \textbf{ray} of $\polyhedron{P}$ iff $\forall \vec{x} \in \polyhedron{P}. \forall \beta \in \mathbb{R}_+. \vec{x} + \beta \vec{r} \in \polyhedron{P}$.
+Let $\polyhedron{P}$ be a convex set. A vector $\vec{r} \in \mathbb{R}_+^n \setminus \{0\}$ is a \textbf{ray} of $\polyhedron{P}$ iff $\forall \vec{x} \in \polyhedron{P}. \forall \beta \in \mathbb{R}_+. \vec{x} + \beta \vec{r} \in \polyhedron{P}$.
 
-The cone of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n$ is denoted as:
+The cone of rays $\vec{r}_1, \dots, \vec{r}_k \in \mathbb{R}_+^n \setminus \{0\}$ is denoted as:
 
 \begin{equation*}
-\raycone(\vec{r}_1, \dots, \vec{r}_k) \coloneqq \left\{ \sum_{i=1}^{k} \alpha_i \vec{r}_i \mid \forall i \in \{1, \dots, k\}. \alpha_i \geq 0 \right\}
+\raycone(\vec{r}_1, \dots, \vec{r}_k) \coloneqq \left\{ \sum_{i=1}^{k} \alpha_i \vec{r}_i \mid \alpha_i \geq 0, i=1..k \right\}
 \end{equation*}
 \end{definition}
 
@@ -123,7 +123,7 @@ For $\polyhedron{P} \subseteq \mathbb{R}^n$ the following statements are equival
 \end{enumerate}
 \end{theorem}
 
-In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e., closed halfspaces, or by its vertices and rays. Most polyhedra can be represented in this way using only their extreme points and extreme rays. Figure \ref{fig:minkowski-weyl} illustrates this theorem on two exemplary polyhedra.
+In simple terms, the Minkowski-Weyl theorem states that any polyhedron can always be defined in two ways: either by its faces, i.e., closed halfspaces, or by its vertices and rays. Any polyhedron can be represented in this way using only its extreme points and extreme rays. Figure \ref{fig:minkowski-weyl} illustrates this theorem on two exemplary polyhedra.
 
 \begin{figure}
 \centering

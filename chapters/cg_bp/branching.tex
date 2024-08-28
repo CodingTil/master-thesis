@@ -6,7 +6,7 @@ In the context of column generation for integer master programs, we follow a sim
 We have seen two distinct approaches to reformulating an \IP{} into an integer master and pricing problem: convexification (Section \ref{sec:cg_bp_ip_convexification}) and discretization (Section \ref{sec:cg_bp_ip_discretization}). Since integrality of the original variables is required in both approaches, we can always branch on fractional solutions of the original variables. However, discretization introduces additional integrality constraints on the master variables, which imply the integrality of the original variables. Therefore, in discretization, we can also branch on the master variables. In the following, we will discuss both approaches in more detail.
 
 \subsection{Branching on the Original Variables}\label{sec:cg_bp_bp_branching_original}
-Assume we have a fractional solution $\vec{x}^*_\RMP{}$ to the relaxed restricted master problem \RMP{}, i.e., there at least one integer variable $x_j$ for which $x_j^* \not\in \mathbb{Z}$. We now must cut off this fractional solution, for example by creating two subbranches (\textbf{dichotomous branching}), one where $x_j \leq \floor{x_j^*}$ and one where $x_j \geq \ceil{x_j^*}$. In each of these subtrees, a solution to \RMP{} should be guaranteed to only use columns that satisfy the branching decision, and during the solving process, the pricing problems should only be able to generate such columns.
+Assume we have a fractional solution $\vec{x}^*_\RMP{}$ to the relaxed restricted master problem \RMP{}, i.e., there at least one integer variable $x_j$ for which $x_j^* \not\in \mathbb{Z}$. We now must cut off this fractional solution, for example by creating two subbranches, one where $x_j \leq \floor{x_j^*}$ and one where $x_j \geq \ceil{x_j^*}$ (\textbf{dichotomous branching}). In each of these subtrees, a solution to \RMP{} should be guaranteed to only use columns that satisfy the branching decision, and during the solving process, the pricing problems should only be able to generate such columns.
 
 \begin{note}
 Branching on the original variables allows the subproblem to generate the interior points required for the correctness of the discretization approach, as discussed in Section \ref{sec:cg_bp_ip_discretization}.
@@ -59,20 +59,20 @@ However, \RMP{} might already contain generated columns that violate the branchi
 Let $Q \coloneqq \ddot{P} \cup R$. Assume our master solution $\vec{\lambda}^*_\RMP{}$ is fractional, i.e., $\lambda_q^* \not\in \mathbb{Z}$ for at least one $q \in Q$. Unfortunately, dichotomous branching on a such a single master variable $\lambda_q$ is very weak: Assume our problem consists of a single non-aggregated subproblem, and $\lambda_q^* = 0.5$. We then would create the down-branch $\lambda_q = 0$ and the up-branch $\lambda_q = 1$. The former constraint would cut off almost no solutions, while the latter would forbid most solutions. This would lead to an extremely unbalanced branching tree, which is only little better than enumerating all possible solutions \cite{thebook}. Cutting off multiple fractional solutions in each child node would be more desirable, i.e., we must branch on constraints, in general of the following form:
 
 \begin{equation*}
-\sum_{p \in \ddot{P}} \operatorname{f}(p) \lambda_p + \sum_{r \in R} \operatorname{f}(r) \lambda_r \leq f \qquad \left[\gamma\right]
+\sum_{p \in \ddot{P}} f(p) \lambda_p + \sum_{r \in R} f(r) \lambda_r \leq h \qquad \left[\gamma\right]
 \end{equation*}
 
-Here, the function $\operatorname{f}$ determines the coefficient of column $p$ or $r$ in the constraint, and $f$ is a constant. The subproblem would have to respect the dual value $\gamma$ of the constraint in the pricing problem:
+Here, the function $f$ determines the coefficient of column $p$ or $r$ in the constraint, and $h$ is a constant. The subproblem would have to respect the dual value $\gamma$ of the constraint in the pricing problem:
 
 \begin{equation*}
 \begin{aligned}
-z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma \operatorname{f}(\vec{x})} - \pi_0 & \\
+z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{A} \right) \vec{x} {\color{blue} - \gamma f(\vec{x})} - \pi_0 & \\
 &\st & \mat{D} \vec{x} & \geq \vec{d} \\
 && \vec{x} & \in \mathbb{Z}_+^n
 \end{aligned}
 \end{equation*}
 
-The question one might ask themselves now is how we can find such a function $\operatorname{f}$ and constant $f$ that are suitable for branching. Henceforth, consider the case where $Q = \ddot{P}$, i.e., our problem is bounded ($R = \emptyset$). In this case, Vanderbeck proposes we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds \cite{vanderbeck1996exact}:
+The question one might ask themselves now is how we can find such a function $f$ and constant $h$ that are suitable for branching. Henceforth, consider the case where $Q = \ddot{P}$, i.e., our problem is bounded ($R = \emptyset$). In this case, Vanderbeck proposes we can find a subset $\emptyset \subset Q' \subset Q$ of variables in \RMP{}, for which the following holds \cite{vanderbeck1996exact}:
 
 \begin{equation}
 \sum_{q \in Q'} \lambda_q^* \eqqcolon K \not\in \mathbb{Z}
@@ -96,7 +96,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{aligned}
 \end{equation}
 
-This idea Vanderbeck proposed plays nicely into our more general definition, where we set $\operatorname{f}(q) = \mathbbm{1}_{q \in Q'}$ and, in this down branch, $f = \floor{K}$.
+This idea Vanderbeck proposed plays nicely into our more general definition, where we set $f(q) = \mathbbm{1}_{q \in Q'}$ and, in this down branch, $f = \floor{K}$.
 
 What remains is to find a routine to determine such a subset $Q'$ in the master solution, for which the set inclusion rule to be added to \SP{} is also \textit{expressible using a finite set of linear constraints}.
 
@@ -109,7 +109,7 @@ Aggregation of subproblems (Section \ref{sec:cg_bp_idsp}) is not an issue when b
 \end{note}
 
 \subsubsection{Vanderbeck's Generic Branching Scheme}\label{sec:cg_bp_bp_branching_generic}
-Vanderbeck proposed an elaborate scheme (\texttt{GENERIC}) \cite{vanderbeck2010reformulation,vanderbeck1996exact} to find such a subset $Q'$ in the master solution, enabling branching on master variables for any type of bounded \IP{}, i.e., which has no extreme rays ($Q = \ddot{P}$). This branching rule is based on component bounds on original variables:
+Vanderbeck proposed an elaborate scheme (\texttt{GENERIC}) \cite{vanderbeck2010reformulation,vanderbeck1996exact} to find such a subset $Q'$ in the master solution, enabling branching on master variables for any type of bounded \IP{}, i.e., which has no extreme rays ($Q = \ddot{P}$). This branching rule is based on bounds applied to the components of a column:
 
 \begin{equation}
 B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}

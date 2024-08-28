@@ -27,7 +27,7 @@ z^*_\SP{} = &\min & \left( \vec{c}\transpose - \vec{\pi}_\vec{b}\transpose \mat{
 \end{equation}
 where $y$ becomes the column entry for the row added to the master, and $y = 1 \Leftrightarrow \vec{x} \in Q'$ is expressible using a finite set of linear constraints.
 
-To find such a $Q'$ that is expressible in \SP{}, Vanderbeck proposes to use bounds on the original variables. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
+To find such a $Q'$ that is expressible in \SP{}, Vanderbeck proposes to use bounds on the components of the columns. Similarly, in our branching scheme, we also find such component bounds. Let us reiterate the notation introduced for Vanderbeck's branching scheme in Section \ref{sec:cg_bp_bp_branching_generic}:
 
 \begin{equation}
 B \coloneqq \left( x_i, \eta, v \right) \in \{x_i \mid 1 \leq i \leq n\} \times \{\leq, \geq\} \times \mathbb{Z}
@@ -104,7 +104,7 @@ y &\in \{0, 1\} & \\
 \end{aligned}
 \end{equation}
 
-What remains is to express all logical equivalences using a finite set of linear constraints. For this, following observations are crucial \cite{thebook}:
+What remains is to express all logical equivalences using a finite set of linear constraints. For this, the following observations are crucial \cite{thebook}:
 
 \begin{itemize}
 \item In the down branch, since $-\gamma_{\downarrow} \geq 0$, $y$ naturally takes the value $0$ and so do all $\bar{y}_s$ and $\ubar{y}_{s'}$. Thus, in the down branch, we need to force all $\bar{y}_s$ and $\ubar{y}_{s'}$ to $1$ if the corresponding component bounds are satisfied, and force $y$ to $1$ if all $\bar{y}_s$ and $\ubar{y}_{s'}$ equal $1$.

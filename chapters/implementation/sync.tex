@@ -24,5 +24,3 @@ We can now synchronize master variables by attaching a strong reference to each 
 \end{lstlisting}
 
 Finally, we note that each \texttt{SCIP\_VAR} already contains a flag indicating whether it has been deleted from the problem. We use this flag instead of marking such variables as deleted in the history buffer ourselves.
-
-This variable history is also used by Reinartz Groba \cite{reinartzgroba2024todo} to keep master cuts up to date.
