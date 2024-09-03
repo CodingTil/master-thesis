@@ -9,6 +9,8 @@ from parse_results import TestResult, extract_data_file
 from plot_grouped_status import plot_solve_status_counts
 from plot_nodes_time import plot_nodes, plot_times
 from plot_outperforms_generic import plot_outperforms_generic
+from plot_pricing_calls import plot_pricing_calls
+from plot_pricing_vars import plot_pricing_vars
 
 order = [
     "generic",
@@ -21,6 +23,12 @@ order = [
     "compbnd-mrm+dvs"
 ]
 order_index = {name: i for i, name in enumerate(order)}
+
+def set_style():
+    plt.rcParams["text.usetex"] = True
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams["font.sans-serif"] = "Latin Modern Sans"
+    sns.set_theme(context="talk", style="white") # , rc={"figure.figsize": (1.3837000138370001, 0.855173638784966)}
 
 def main(name: str, directory_path: str, slides: bool):
     # Check if the provided path is a directory
@@ -50,17 +58,17 @@ def main(name: str, directory_path: str, slides: bool):
     output_directory = Path(f".{"/slides" if slides else ""}/general/{name}")
     output_directory.mkdir(parents=True, exist_ok=True)
 
-    # set style
-    plt.rcParams["text.usetex"] = True
-    plt.rcParams["font.family"] = "sans-serif"
-    plt.rcParams["font.sans-serif"] = "Latin Modern Sans"
-    sns.set_theme(context="talk", style="white") # , rc={"figure.figsize": (1.3837000138370001, 0.855173638784966)}
+    # Set style
+    set_style()
 
     # Export plots
     plot_solve_status_counts(name, test_results, slides)
     plot_nodes(name, test_results, slides)
     plot_times(name, test_results, slides)
+    plot_pricing_calls(name, test_results, slides)
+    plot_pricing_vars(name, test_results, slides)
     plot_outperforms_generic(name, test_results, slides)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

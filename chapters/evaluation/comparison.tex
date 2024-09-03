@@ -54,11 +54,50 @@
 \section{Comparison of the different Separation Heuristics}\label{sec:evaluation_comparison_separation}
 We compared different separation heuristics with and without full-tree dual value stabilization by running the test set on 12 configurations of the component bound branching rule. These configurations varied the first- and second-stage separation heuristics (Section \ref{sec:cmpbnd_separation}) and the stabilization method. The naming conventions for these runs are as follows: runs using both the \texttt{MaxRangeMidrange} and \texttt{MostDistinctMedian} first-stage heuristics are named \texttt{compbnd}. Runs using only \texttt{MaxRangeMidrange} are named \texttt{compbnd-mrm}, and those using only the \texttt{MostDistinctMedian} heuristic are named \texttt{compbnd-mdm}. If full-tree dual value stabilization was applied, \texttt{+dvs} is appended to the name. For example, \texttt{compbnd-mdm+dvs} uses the \texttt{MostDistinctMedian} heuristic with full-tree dual value stabilization.
 
+\begin{figure}
+	\centering
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/pricing_calls.svg}
+		\caption{\texttt{MostFractional}: pricing calls}
+		\label{fig:mostfractional_pricing_calls}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/pricing_calls.svg}
+		\caption{\texttt{ClosestToZHalf}: pricing calls}
+		\label{fig:closesttozhalf_pricing_calls}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/MostFractional/pricing_vars.svg}
+		\caption{\texttt{MostFractional}: priced variables}
+		\label{fig:mostfractional_pricing_vars}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.495\textwidth}
+		\centering
+		\includesvg[width=\textwidth]{images/general/ClosestToZHalf/pricing_vars.svg}
+		\caption{\texttt{ClosestToZHalf}: priced variables}
+		\label{fig:closesttozhalf_pricing_vars}
+	\end{subfigure}
+
+	\caption{Comparison of all run configurations (extended). In the boxplots the dots represent the arithmetic mean of the data. Outliers are not visualized.}
+	\label{fig:comparison_general_extra}
+\end{figure}
+
 We also proposed two options for the second-stage heuristic: \texttt{ClosestToZHalf} and \texttt{MostFractional}. For readability, we grouped all runs by their second-stage heuristic and presented their statistics in separate figures.
 
 For reference, we included Vanderbeck's generic branching scheme results, denoted as \texttt{generic}. This allows us to compare the component bound branching rule's performance against generic branching scheme. As discussed in Section \ref{sec:cmpbnd_simdif}, we expect the generic branching scheme to outperform the component bound branching rule, partially due to the latter having to fall back to a general \MIP{} solver, while the former may retain the ability to use special-case solving algorithms after branching. To measure the impact of having to resort to a \MIP{} solver, we also included a configuration of Vanderbeck's scheme in which we force the use of a \MIP{} solver at all non-root nodes, denoted as \texttt{generic-mip}.
 
 Analyzing the results in Figure \ref{fig:comparison_general}, several key observations emerge. First, full-tree dual value stabilization generally degrades the performance of the component bound branching rule. Second, runs using the \texttt{MostFractional} heuristic significantly outperform those using the \texttt{ClosestToZHalf} heuristic.
+
+That the \texttt{MostFractional} heuristic outperforms the \texttt{ClosestToZHalf} heuristic may be explained by the former producing a smaller search tree, which in turn leads to fewer pricing calls and priced variables, as shown in Figure \ref{fig:comparison_general_extra}. As for the impact of dual value stabilization, we observe the opposite effect: although the search tree is smaller, pricing is called less often, and fewer variables are priced, the overall performance with respect to solving status and time is worse. This suggests that the management cost of dual value stabilization in non-root nodes outweighs the potential performance gains.
 
 Among the best-performing configurations, i.e., those using the \texttt{MostFractional} second-stage heuristic, the number of instances solved and the solving times significantly improve when using both first-stage heuristics instead of just one. This pattern suggests that neither first-stage heuristic universally finds the optimal component bound sequences, highlighting the importance of the second-stage heuristic in selecting the best branching decisions.
 
@@ -192,7 +231,7 @@ Figure \ref{fig:compbnd_num_bounds} shows the distribution of the number of comp
 
 Figure \ref{fig:comparison_depth} illustrates the number of branching decisions per depth and the average number of component bounds per branching decision across different depths. Given that the \texttt{COMPBND} rule creates a binary search tree and each instance is solved with only a few hundred nodes (Figure \ref{fig:mostfractional_nodes}), most branching decisions occur at depths in the low hundreds. Consequently, we plotted the average number of component bounds per branching decision up to depth 500.
 
-Our first observation is that full-tree dual value stabilization has little effect on the average number of component bounds per branching decision. Since each configuration produces a similar number of nodes with and without stabilization (Figure \ref{fig:mostfractional_nodes}), we further estimate that both search trees are similar. Therefore, as roughly the same amount of nodes are solved with similar complexities of the pricing problems, the performance degradation discussed in Section \ref{sec:evaluation_comparison_separation} suggests that the management cost of dual value stabilization in non-root nodes outweighs the potential performance gains.
+Our first observation is that full-tree dual value stabilization has little effect on the average number of component bounds per branching decision. Since each configuration produces a similar number of nodes with and without stabilization (Figure \ref{fig:mostfractional_nodes}), we further estimate that both search trees are similar. Therefore, as roughly the same amount of nodes are solved with similar complexities of the pricing problems, the performance degradation discussed in Section \ref{sec:evaluation_comparison_separation} suggests that the management cost of dual value stabilization in non-root nodes outweighs the potential performance gains. This is in line with our initial thoughts on the impact of dual value stabilization.
 
 For all configurations, the average number of component bounds per branching decision rises steeply until around depth 100, then stabilizes and gradually falls, though variation increases. This behavior can be explained as follows: in the initial levels, there are many fractional columns, but few branching decisions have been imposed, making it easy to split the columns into two groups. As branching continues, the number of fractional columns remains high, but many constraints have already been imposed, making it harder to find separating component bound sequences, requiring more component bounds. Eventually, the number of fractional columns decreases, making it easier to find separating component bounds again. The point at which this tipping occurs likely depends on the instance.
 

@@ -12,6 +12,8 @@ class SolveStatus(Enum):
 @dataclass
 class InstanceResult:
     name: str
+    pricing_calls: int
+    pricing_vars: int
     num_nodes: int
     solve_time: float
     solve_status: SolveStatus
@@ -43,10 +45,12 @@ def parse_instance_results(data: str) -> List[InstanceResult]:
             continue
         parts: List[str] = re.split(r'\s+', line.strip())
         name: str = parts[0]
+        pricing_calls: int = int(parts[16])
+        pricing_vars: int = int(parts[17])
         num_nodes: int = int(parts[21])
         solve_time: float = float(parts[22])
         solve_status: SolveStatus = parse_solve_status(" ".join(parts[23:]))
-        instance_result: InstanceResult = InstanceResult(name, num_nodes, solve_time, solve_status)
+        instance_result: InstanceResult = InstanceResult(name, pricing_calls, pricing_vars, num_nodes, solve_time, solve_status)
         instance_results.append(instance_result)
     return instance_results
 

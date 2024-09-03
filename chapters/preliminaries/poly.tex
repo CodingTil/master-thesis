@@ -56,6 +56,7 @@ A \textbf{hyperplane} $\polyhedron{H} \subset \mathbb{R}^n$ of a $n$-dimensional
 Any hyperplane is a convex set.
 \end{corollary}
 
+\iffalse
 \begin{proof}
 Let $\polyhedron{H} = \{\vec{x} \mid \vec{f}\transpose \vec{x} = f\}$ be a hyperplane. Let $k \in \mathbb{N}$, $\vec{x}_1, \dots, \vec{x}_k \in \polyhedron{H}$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k} \alpha_i = 1$:
 
@@ -69,6 +70,7 @@ Let $\polyhedron{H} = \{\vec{x} \mid \vec{f}\transpose \vec{x} = f\}$ be a hyper
 
 Therefore, the convex combination $\sum_{i=1}^{k} \alpha_i \vec{x}_i$ is in the hyperplane $\polyhedron{H}$.
 \end{proof}
+\fi
 
 % Halfspace
 \begin{definition}
@@ -79,6 +81,7 @@ A \textbf{halfspace} is the set either above or below a hyperplane. A halfspace 
 Any halfspace is a convex set.
 \end{corollary}
 
+\iffalse
 \begin{proof}
 Let $\polyhedron{H}^+ = \{\vec{x} \mid \vec{f}\transpose \vec{x} > f\}$ be an open halfspace (analogous for $\polyhedron{H}^- = \{\vec{x} \mid \vec{f}\transpose \vec{x} < f\}$, and for the closed halfspaces). Let $k \in \mathbb{N}$, $\vec{x_1}, \dots, \vec{x_k} \in \polyhedron{H}^+$. For any $\alpha_1, \dots, \alpha_k \in \mathbb{R}_+$ with $\sum_{i=1}^{k} \alpha_i = 1$:
 
@@ -92,6 +95,7 @@ Let $\polyhedron{H}^+ = \{\vec{x} \mid \vec{f}\transpose \vec{x} > f\}$ be an op
 
 Therefore, the convex combination $\sum_{i=1}^{k} \alpha_i \vec{x}_i$ is in the halfspace $\polyhedron{H}^+$.
 \end{proof}
+\fi
 
 % Polyhedron
 \begin{definition}
@@ -102,9 +106,11 @@ A \textbf{polyhedron} $\polyhedron{P} \subseteq \mathbb{R}^n$ is defined by the 
 A polyhedron is a convex set.
 \end{corollary}
 
+\iffalse
 \begin{proof}
 Follows from Corollaries \ref{cor:intersection_convex} and \ref{cor:halfspace_convex}.
 \end{proof}
+\fi
 
 % Monkowski-Weyl
 \begin{definition}
