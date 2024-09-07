@@ -49,7 +49,7 @@ def main(name: str, directory_path: str, slides: bool):
     test_results: List[TestResult] = [extract_data_file(str(res_file.absolute())) for res_file in res_files]
 
     if slides:
-        test_results = [test_result for test_result in test_results if test_result.name in ["generic", "generic-mip", "compbnd"]]
+        test_results = [test_result for test_result in test_results if test_result.name in ["generic", "generic-mip", "compbnd", "compbnd+dvs"]]
 
     # Sort the test results
     test_results.sort(key=lambda x: order_index.get(x.name))

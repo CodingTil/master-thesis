@@ -7,8 +7,6 @@ import scipy.stats as st
 
 from typing import Dict
 
-from hatches import get_hatches
-
 order = [
     "compbnd",
     "compbnd+dvs",

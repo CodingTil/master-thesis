@@ -55,7 +55,7 @@ z^*_\MP{} = &\min & \sum_{p \in P} c_p \lambda_p &+ &\sum_{r \in R} c_r \lambda_
 
 In this formulation, the last constraint corresponds to projecting a solution of the \MP{} using the $\lambda$ variables back into a solution of the original \LP{}. As this constraint is not otherwise involved in the optimization, it is often omitted during the solving stages and only used afterward to reconstruct a solution using the original $\vec{x}$ variables \cite{thebook}.
 
-Since the extreme points and extreme rays of $\polyhedron{D}$ are often unknown, and their number might be enormous, solving the \MP{} directly is typically infeasible \cite{thebook}. Instead, we can generate these columns on the fly using column generation. For this, we need a subproblem that finds (improving) columns for the \MP{}, i.e., extreme points and extreme rays of $\polyhedron{D}$. We can formulate this pricing problem as follows:
+Since the extreme points and extreme rays of $\polyhedron{D}$ are often unknown, and their number might be enormous, solving the \MP{} directly is typically infeasible \cite{thebook}. Instead, we can generate these columns iteratively using column generation. For this, we need a subproblem that finds (improving) columns for the \MP{}, i.e., extreme points and extreme rays of $\polyhedron{D}$. We can formulate this pricing problem as follows:
 
 \begin{equation}
 \begin{aligned}
