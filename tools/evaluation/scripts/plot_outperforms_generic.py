@@ -39,6 +39,9 @@ def plot_outperforms_other(name: str, other: str, test_results: List[TestResult]
 
         for test_result in other_results:
             other_instance: InstanceResult = test_result.instance_results[index]
+
+            assert(generic_instance.name == other_instance.name)
+
             if other_instance.solve_status == SolveStatus.FAIL:
                 continue
             if other_instance.solve_status == SolveStatus.TIMEOUT and other_instance.num_nodes == 0:
