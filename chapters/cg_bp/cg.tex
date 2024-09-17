@@ -21,7 +21,7 @@ z^*_\RMP{} = &\min & \sum_{\vec{x} \in \indexset{X}'} c_\vec{x} \lambda_\vec{x} 
 \end{aligned}
 \end{equation}
 
-Assuming \MP{} is feasible, two important questions arise for finding an optimal solution to \MP{} by solving \RMP{}: first, how do we select a subset $\indexset{X}'$ of variables, such that \RMP{} remains feasible? Without this property, no solution for \RMP{} can be found, which would contradict the feasibility of \MP{}. Secondly, assuming a solution for \RMP{} is found, possibly even optimal for the \RMP{}, how can we extend this solution to eventually find an optimal solution for \MP{}?
+Assuming \MP{} is feasible, two important questions arise for finding an optimal solution to \MP{} by solving \RMP{}: first, how do we select a subset $\indexset{X}'$ of variables, such that \RMP{} remains feasible? Without this property, no solution for \RMP{} can be found, which would contradict the feasibility of \MP{}. Secondly, assuming a solution for \RMP{} is found, possibly even optimal for the \RMP{}, how can we build upon this solution to eventually find an optimal solution for \MP{}?
 
 The following sections address these questions in detail (Sections \ref{sec:cg_bp_cg_farkas} and \ref{sec:cg_bp_cg_reduced}), leading to the complete column generation algorithm (Section \ref{sec:cg_bp_cg_alg}).
 
@@ -57,7 +57,7 @@ Considering the infeasibility of \RMP{} we can further derive the following stat
 
 Therefore, there exists some variable $\vec{x} \in \indexset{X} \setminus \indexset{X}'$ such that its column $\vec{a}_\vec{x} \coloneqq \mat{A}_{\vert \{\vec{x}\}}$ satisfies $\vec{\pi}\transpose \vec{a}_\vec{x} > 0$ for some $\vec{\pi} \in \mathbb{R}^m$. If none existed, \MP{} would not be feasible.
 
-This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
+This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to \RMP{} can be formalized as a pricing problem with cost coefficients $c_\vec{x} = 0$ (Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \FP{}:
 
 \begin{equation}
 \operatorname{F}(\vec{\pi}) = \underset{x \in \indexset{X}}{\min} \, -\vec{\pi}\transpose \vec{a}_x
@@ -66,7 +66,7 @@ This process of finding corresponding columns $\vec{a}_\vec{x}$ to add to \RMP{}
 We can add all solutions $\vec{x}$ with a value of $\operatorname{F}(\vec{\pi}) < 0$ to $\indexset{X}'' \coloneqq \indexset{X}' \cup \{\vec{x}_i\}$, adding the corresponding column $\begin{bmatrix}0 \\ \vec{a}_\vec{x} \end{bmatrix}$ to the problem, thus turning any infeasible \RMP{} feasible \cite{thebook}.
 
 \subsection{Reduced Cost Pricing \RCP{}}\label{sec:cg_bp_cg_reduced}
-Assume \RMP{} is feasible. Using an appropriate solver, we can construct a solution that is optimal within \RMP{}, providing us with the dual values $\vec{\pi}$. We now need to verify whether this solution is also optimal for \MP{}. For this, we can use the familiar pricing problem from the primal simplex algorithm (see Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
+Assume \RMP{} is feasible. Using an appropriate solver, we can construct a solution that is optimal within \RMP{}, providing us with the dual values $\vec{\pi}$. We now need to verify whether this solution is also optimal for \MP{}. For this, we can use the familiar pricing problem from the primal simplex algorithm (Equation \eqref{eq:psa_pp}). Let us denote this subproblem as the \RCP{}:
 
 \begin{equation}
 \bar{c}(\vec{\pi}) = \underset{\vec{x} \in \indexset{X}}{\min} \, c_\vec{x} - \vec{\pi}\transpose \vec{a}_\vec{x}
